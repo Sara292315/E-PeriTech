@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto - E-PeriTech</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Estilos específicos para la página de contacto */
+        .contact-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .contact-hero h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        .contact-hero p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        /* Formulario de contacto */
+        .contact-form-section h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .contact-form-section p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Información de contacto */
+        .contact-info-section h2 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .contact-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .contact-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        }
+
+        .contact-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .contact-card-content h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .contact-card-content p {
+            color: #666;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .contact-card-content a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .contact-card-content a:hover {
+            text-decoration: underline;
+        }
+
+        /* Mapa */
+        .map-section {
+            background: #f8f9fa;
+            padding: 60px 20px;
+        }
+
+        .map-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .map-container h2 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .map-frame {
+            width: 100%;
+            height: 450px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .map-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+        }
+
+        .map-placeholder-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .map-placeholder p {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Horarios */
+        .schedule-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .schedule-section h2 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .schedule-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .schedule-card-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        .schedule-card h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .schedule-card p {
+            color: #666;
+            line-height: 1.8;
+            margin: 5px 0;
+        }
+
+        .schedule-card .highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* Alert de éxito */
+        .success-alert {
+            display: none;
+            background: #10b981;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+        }
+
+        .success-alert.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-hero h1 {
+                font-size: 32px;
+            }
+
+            .map-frame {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Top -->
+    <div class="header-top">
+        Expertos en hardware, aliados de tu bolsillo.💸
+    </div>
+
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">🖥️ E-PeriTech</div>
+            
+            <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
+            
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="index.html#productos">Productos</a></li>
+                <li><a href="index.html#ofertas">Ofertas</a></li>
+                <li><a href="index.html#marcas">Marcas</a></li>
+                <li><a href="contacto.html">¿Dudas?</a></li>
+            </ul>
+
+            <div class="nav-icons">
+                <button class="icon-btn" onclick="toggleSearch()">🔍</button>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero de Contacto -->
+    <section class="contact-hero">
+        <h1>📞 Contáctanos</h1>
+        <p>Estamos aquí para ayudarte. Envíanos un mensaje y te responderemos pronto.</p>
+    </section>
+
+    <!-- Sección de Contacto -->
+    <div class="contact-container">
+        <div class="contact-grid">
+            <!-- Formulario -->
+            <div class="contact-form-section">
+                <h2>Envíanos un mensaje</h2>
+                <p>Completa el formulario y nos pondremos en contacto contigo lo antes posible.</p>
+                
+                <div class="success-alert" id="successAlert">
+                    ✅ ¡Mensaje enviado con éxito! Te contactaremos pronto.
+                </div>
+
+                <form id="contactForm" onsubmit="handleSubmit(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombre">Nombre completo *</label>
+                            <input type="text" id="nombre" name="nombre" required placeholder="Juan Pérez">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Correo electrónico *</label>
+                            <input type="email" id="email" name="email" required placeholder="juan@ejemplo.com">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telefono">Teléfono *</label>
+                            <input type="tel" id="telefono" name="telefono" required placeholder="+57 3185838072">
+                        </div>
+                        <div class="form-group">
+                            <label for="asunto">Asunto *</label>
+                            <select id="asunto" name="asunto" required>
+                                <option value="">Selecciona un asunto</option>
+                                <option value="consulta">Consulta de producto</option>
+                                <option value="soporte">Soporte web</option>
+                                <option value="se"></option>
+                                <option value="pedido">Estado de pedido</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mensaje">Mensaje *</label>
+                        <textarea id="mensaje" name="mensaje" required placeholder="Escribe tu mensaje aquí..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Enviar Mensaje 📤</button>
+                </form>
+            </div>
+
+            <!-- Información de Contacto -->
+            <div class="contact-info-section">
+                <h2>Información de contacto</h2>
+                
+                <div class="contact-cards">
+                   <!-- <div class="contact-card"> -->  
+                    
+                    </div>
+
+                    <div class="contact-card">
+                        <div class="contact-icon">📞</div>
+                        <div class="contact-card-content">
+                            <h3>Teléfono</h3>
+                            <p>Ventas: <a href="tel:+57 314 2800623">+57 314 2800623</a><br>
+                            Soporte: <a href="tel:+57 316 6133839">+57 316 6133839</a><br>
+                            WhatsApp: <a href="https://wa.me/5731437799697">+57 314 3779969</a></p>
+                        </div>
+                    </div>
+
+                    <div class="contact-card">
+                        <div class="contact-icon">📧</div>
+                        <div class="contact-card-content">
+                            <h3>Correo electrónico</h3>
+                            <p>Ventas: <a href="est_ja_florez@fesc.edu.co">est_ja_florez@fesc.edu.co</a><br>
+                            Soporte: <a href="est_ma.florez@fesc.edu.co">est_ma.florez@fesc.edu.co</a><br>
+                            General: <a href="est_om_carrillo@fesc.edu.co">est_om_carrillo@fesc.edu.co</a><br>
+                            Soporte de la pagina: <a href="mailto:est_sm_morgensztern@fesc.edu.co">est_sm_morgensztern@fesc.edu.co</a></p>
+                        </div>
+                    </div>
+
+                    <div class="contact-card">
+                        <div class="contact-icon">💬</div>
+                        <div class="contact-card-content">
+                            <h3>Redes sociales</h3>
+                            <p>Síguenos en nuestras redes:<br>
+                             • Instagram • Twitter<br>
+                            @sarah_2923_</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Horarios de atención -->
+    <section class="schedule-section">
+        <h2>Horarios de Atención</h2>
+        <div class="schedule-grid">
+        
+            <div class="schedule-card">
+                <div class="schedule-card-icon">💬</div>
+                <h3>Chat en Línea</h3>
+                <p><span class="highlight">Lunes a Viernes:</span> 8:00 AM - 8:00 PM</p>
+                <p><span class="highlight">Sábados:</span> 9:00 AM - 6:00 PM</p>
+                <p><span class="highlight">Domingos:</span> Cerrado</p>
+            </div>
+
+            <div class="schedule-card">
+                <div class="schedule-card-icon">📱</div>
+                <h3>WhatsApp</h3>
+                <p><span class="highlight">Todos los días:</span></p>
+                <p>Respuesta automática 24/7</p>
+                <p>Atención personalizada en horario comercial</p>
+            </div>
+        </div>
+    </section>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>🖥️ E-PeriTech</h3>
+                <p>Tu plataforma de confianza para asesoramiento en periféricos y tecnología. Información precisa y recomendaciones honestas.</p>
+                <div class="social-icons">
+                    <div class="social-icon">📘</div>
+                    <div class="social-icon">📷</div>
+                    <div class="social-icon">🐦</div>
+                    <div class="social-icon">📺</div>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Información</h3>
+                <ul>
+                    <li><a href="nosotros.html">Sobre Nosotros</a></li>
+                    <li><a href="terminos.html">Términos y Condiciones</a></li>
+                    <li><a href="faq.html">Política de Privacidad</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Atención al Cliente</h3>
+                <ul>
+                    <li><a href="#">Preguntas Frecuentes</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contacto</h3>
+                <ul>
+                    <li>📞 +57 3185838072</li>
+                    <li>📧est_sm_morgensztern@fesc.edu.co</li>
+                    <li>📍 Cúcuta, Colombia</li>
+                    <li>🕐 Lun-Vie: 9am-6pm</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 E-PeriTech. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle mobile menu
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+
+        // Handle form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            // Aquí puedes agregar la lógica para enviar el formulario a un servidor
+            // Por ahora, solo mostramos el mensaje de éxito
+            
+            const successAlert = document.getElementById('successAlert');
+            successAlert.classList.add('show');
+            
+            // Limpiar el formulario
+            document.getElementById('contactForm').reset();
+            
+            // Scroll suave hacia el mensaje de éxito
+            successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Ocultar el mensaje después de 5 segundos
+            setTimeout(() => {
+                successAlert.classList.remove('show');
+            }, 5000);
+        }
+
+        // Toggle search (placeholder para mantener consistencia)
+        function toggleSearch() {
+            alert('Función de búsqueda disponible en la página principal');
+        }
+    </script>
+</body>
+</html>

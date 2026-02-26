@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preguntas Frecuentes - E-PeriTech</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .faq-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .faq-hero h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        .faq-hero p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+
+        .faq-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        .faq-intro {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 60px;
+        }
+
+        .faq-intro p {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .faq-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .category-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .category-btn:hover, .category-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .category-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .faq-search {
+            margin-bottom: 50px;
+        }
+
+        .search-box-faq {
+            display: flex;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-box-faq input {
+            flex: 1;
+            padding: 18px 50px 18px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-box-faq input:focus {
+            border-color: #667eea;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #667eea;
+        }
+
+        .faq-section {
+            margin-bottom: 40px;
+        }
+
+        .faq-section-title {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .faq-section-icon {
+            font-size: 32px;
+        }
+
+        .faq-item {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: box-shadow 0.3s;
+        }
+
+        .faq-item:hover {
+            box-shadow: 0 5px 25px rgba(0,0,0,0.12);
+        }
+
+        .faq-question {
+            padding: 25px 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 18px;
+            color: #333;
+            user-select: none;
+        }
+
+        .faq-question:hover {
+            color: #667eea;
+        }
+
+        .faq-icon {
+            font-size: 24px;
+            transition: transform 0.3s;
+            color: #667eea;
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0 30px;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 1000px;
+            padding: 0 30px 25px 30px;
+        }
+
+        .faq-answer p {
+            color: #555;
+            line-height: 1.8;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .faq-answer ul {
+            color: #555;
+            line-height: 1.8;
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        .faq-answer li {
+            margin-bottom: 10px;
+        }
+
+        .highlight-answer {
+            background: #f0f4ff;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .contact-cta {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .contact-cta h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .contact-cta p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-cta {
+            padding: 15px 35px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-cta-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-cta-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-3px);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .no-results-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .faq-hero h1 {
+                font-size: 32px;
+            }
+
+            .faq-categories {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .faq-question {
+                font-size: 16px;
+                padding: 20px;
+            }
+
+            .faq-answer {
+                padding: 0 20px;
+            }
+
+            .faq-item.active .faq-answer {
+                padding: 0 20px 20px 20px;
+            }
+
+            .contact-cta {
+                padding: 30px 20px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .btn-cta {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Top -->
+    <div class="header-top">
+        Expertos en hardware, aliados de tu bolsillo.💸
+    </div>
+
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">🖥️ E-PeriTech</div>
+            
+            <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
+            
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="index.html#productos">Productos</a></li>
+                <li><a href="ofertas.html">Ofertas</a></li>
+                <li><a href="marcas.html">Marcas</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+            </ul>
+
+            <div class="nav-icons">
+                <button class="icon-btn" onclick="window.location.href='index.html'">🔍</button>
+                <button class="icon-btn" onclick="window.location.href='comparar.html'" title="Comparar productos">⚖️</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section class="faq-hero">
+        <h1>❓ Preguntas Frecuentes</h1>
+        <p>Encuentra respuestas a las dudas más comunes</p>
+    </section>
+
+    <!-- Contenedor FAQ -->
+    <div class="faq-container">
+        <div class="faq-intro">
+            <p>Hemos recopilado las preguntas más frecuentes de nuestros usuarios. Si no encuentras la respuesta que buscas, no dudes en contactarnos.</p>
+        </div>
+
+        <!-- Buscador -->
+        <div class="faq-search">
+            <div class="search-box-faq">
+                <input type="text" id="searchFAQ" placeholder="Buscar en preguntas frecuentes..." onkeyup="searchFAQ()">
+                <span class="search-icon">🔍</span>
+            </div>
+        </div>
+
+        <!-- Categorías -->
+        <div class="faq-categories">
+            <div class="category-btn active" onclick="filterCategory('all')">
+                <div class="category-icon">📋</div>
+                <div>Todas</div>
+            </div>
+            <div class="category-btn" onclick="filterCategory('general')">
+                <div class="category-icon">ℹ️</div>
+                <div>General</div>
+            </div>
+            <div class="category-btn" onclick="filterCategory('productos')">
+                <div class="category-icon">🖥️</div>
+                <div>Productos</div>
+            </div>
+            <div class="category-btn" onclick="filterCategory('asesoria')">
+                <div class="category-icon">💡</div>
+                <div>Asesoría</div>
+            </div>
+            <div class="category-btn" onclick="filterCategory('compra')">
+                <div class="category-icon">🛒</div>
+                <div>Compra</div>
+            </div>
+        </div>
+
+        <!-- Preguntas - General -->
+        <div class="faq-section" data-category="general">
+            <h2 class="faq-section-title">
+                <span class="faq-section-icon">ℹ️</span>
+                Información General
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Qué es E-PeriTech?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>E-PeriTech es una plataforma especializada en asesoramiento y guía de compra de periféricos y tecnología. No somos una tienda en línea, sino un servicio de consultoría que te ayuda a tomar decisiones informadas sobre qué productos tecnológicos comprar.</p>
+                    <p>Proporcionamos información detallada, comparativas, reseñas y recomendaciones personalizadas para que encuentres los productos que mejor se adapten a tus necesidades y presupuesto.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Ustedes venden productos directamente?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>No, E-PeriTech no vende productos directamente.</strong> Somos una plataforma de información y asesoramiento.</p>
+                    <div class="highlight-answer">
+                        <p><strong>Nuestro servicio consiste en:</strong></p>
+                        <ul>
+                            <li>Asesorarte sobre qué productos comprar</li>
+                            <li>Proporcionarte información técnica detallada</li>
+                            <li>Comparar diferentes opciones del mercado</li>
+                            <li>Orientarte sobre dónde y cómo comprar</li>
+                            <li>Resolver tus dudas técnicas</li>
+                        </ul>
+                    </div>
+                    <p>Te ayudamos a encontrar los mejores productos y te orientamos sobre dónde adquirirlos con distribuidores confiables.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿El servicio de asesoramiento tiene algún costo?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>¡No! Nuestro servicio de asesoramiento es completamente gratuito.</strong></p>
+                    <p>Puedes consultar toda la información de nuestro sitio, solicitar asesoramiento personalizado y recibir recomendaciones sin ningún costo. No cobramos comisiones ni tarifas por nuestras recomendaciones.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Cómo se sostiene E-PeriTech si no cobra por sus servicios?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>E-PeriTech puede recibir comisiones de afiliados cuando los usuarios realizan compras a través de enlaces recomendados a tiendas asociadas. Sin embargo, esto no afecta nuestras recomendaciones, que siempre se basan en la calidad, características técnicas y relación calidad-precio de los productos.</p>
+                    <p>Nuestra prioridad es proporcionar información honesta y útil que te ayude a tomar las mejores decisiones.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preguntas - Productos -->
+        <div class="faq-section" data-category="productos">
+            <h2 class="faq-section-title">
+                <span class="faq-section-icon">🖥️</span>
+                Sobre Productos
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Cómo saben qué productos son buenos?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Nuestro equipo de expertos evalúa productos basándose en múltiples criterios:</p>
+                    <ul>
+                        <li><strong>Especificaciones técnicas:</strong> Analizamos en detalle las características de cada producto</li>
+                        <li><strong>Reseñas de usuarios:</strong> Consideramos la experiencia de usuarios reales</li>
+                        <li><strong>Pruebas especializadas:</strong> Consultamos reviews de sitios técnicos reconocidos</li>
+                        <li><strong>Relación calidad-precio:</strong> Evaluamos si el precio es justo por lo que ofrece</li>
+                        <li><strong>Soporte y garantía:</strong> Verificamos el respaldo del fabricante</li>
+                        <li><strong>Compatibilidad:</strong> Comprobamos que funcione con diferentes sistemas</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Los precios mostrados son actuales?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Los precios mostrados en E-PeriTech son <strong>referenciales e informativos</strong>. Hacemos nuestro mejor esfuerzo por mantenerlos actualizados, pero pueden variar según:</p>
+                    <ul>
+                        <li>El distribuidor o tienda donde compres</li>
+                        <li>Promociones vigentes</li>
+                        <li>Disponibilidad del producto</li>
+                        <li>Tu ubicación geográfica</li>
+                        <li>Fluctuaciones del mercado</li>
+                    </ul>
+                    <div class="highlight-answer">
+                        <p><strong>Recomendación:</strong> Siempre verifica el precio actual directamente con el vendedor antes de realizar tu compra.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Qué significa que un producto esté "en oferta"?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Cuando mostramos un producto en oferta, significa que hemos detectado que tiene un descuento significativo en comparación con su precio regular habitual.</p>
+                    <p>Sin embargo, recuerda que:</p>
+                    <ul>
+                        <li>Las ofertas son de los vendedores, no nuestras</li>
+                        <li>Pueden tener duración limitada</li>
+                        <li>La disponibilidad puede cambiar rápidamente</li>
+                        <li>Los términos específicos dependen del vendedor</li>
+                    </ul>
+                    <p>Te recomendamos actuar rápido cuando encuentres una buena oferta y verificar su vigencia con el vendedor.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Puedo confiar en las especificaciones técnicas que publican?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Sí, nos esforzamos por publicar información técnica precisa obtenida directamente de:</p>
+                    <ul>
+                        <li>Sitios oficiales de los fabricantes</li>
+                        <li>Fichas técnicas oficiales</li>
+                        <li>Manuales de usuario</li>
+                        <li>Fuentes técnicas verificadas</li>
+                    </ul>
+                    <p>No obstante, los fabricantes pueden actualizar especificaciones sin previo aviso. Si tienes dudas sobre alguna especificación crítica para tu decisión, te recomendamos verificarla directamente con el fabricante o vendedor.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preguntas - Asesoría -->
+        <div class="faq-section" data-category="asesoria">
+            <h2 class="faq-section-title">
+                <span class="faq-section-icon">💡</span>
+                Asesoría Personalizada
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Cómo puedo solicitar asesoría personalizada?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Solicitar asesoría es muy fácil. Puedes contactarnos a través de:</p>
+                    <ul>
+                        <li><strong>WhatsApp:</strong> +57 314 2800623 (respuesta rápida)</li>
+                        <li><strong>Correo electrónico:</strong> est_sm_morgensztern@fesc.edu.co</li>
+                        <li><strong>Formulario de contacto:</strong> En nuestra página de contacto</li>
+                        <li><strong>Teléfono:</strong> Llámanos en horario de atención</li>
+                    </ul>
+                    <div class="highlight-answer">
+                        <p><strong>Para una mejor asesoría, cuéntanos:</strong></p>
+                        <ul>
+                            <li>¿Qué tipo de producto buscas?</li>
+                            <li>¿Cuál es tu presupuesto aproximado?</li>
+                            <li>¿Para qué lo vas a usar? (gaming, trabajo, diseño, etc.)</li>
+                            <li>¿Tienes preferencias de marca?</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Qué tan rápido responden las consultas?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Nuestros tiempos de respuesta varían según el canal:</p>
+                    <ul>
+                        <li><strong>WhatsApp:</strong> Generalmente entre 15 minutos y 2 horas en horario laboral</li>
+                        <li><strong>Correo electrónico:</strong> Máximo 24 horas hábiles</li>
+                        <li><strong>Teléfono:</strong> Atención inmediata en horario de oficina</li>
+                    </ul>
+                    <p><strong>Horario de atención:</strong> Lunes a Viernes de 9:00 AM a 7:00 PM, Sábados de 9:00 AM a 2:00 PM</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Pueden ayudarme si no sé exactamente qué necesito?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>¡Por supuesto! Esa es nuestra especialidad.</strong></p>
+                    <p>Muchos usuarios nos contactan sin saber exactamente qué producto necesitan. Nuestro proceso de asesoría incluye:</p>
+                    <ol>
+                        <li><strong>Entender tus necesidades:</strong> Te hacemos preguntas sobre cómo usarás el producto</li>
+                        <li><strong>Definir tu presupuesto:</strong> Trabajamos dentro de tus posibilidades</li>
+                        <li><strong>Explicar opciones:</strong> Te presentamos alternativas en lenguaje claro</li>
+                        <li><strong>Comparar pros y contras:</strong> De cada opción recomendada</li>
+                        <li><strong>Hacer recomendación final:</strong> Basada en toda la información</li>
+                    </ol>
+                    <p>No necesitas ser experto en tecnología, nosotros te guiamos en todo el proceso.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Puedo pedirles que comparen productos específicos?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>¡Claro que sí! Esa es una de nuestras funciones principales. Puedes:</p>
+                    <ul>
+                        <li>Usar nuestra herramienta de comparación en el sitio web</li>
+                        <li>Enviarnos los productos que quieres comparar</li>
+                        <li>Pedirnos una comparativa detallada personalizada</li>
+                        <li>Solicitar recomendación entre varias opciones</li>
+                    </ul>
+                    <p>Te proporcionaremos una comparación detallada con ventajas, desventajas y nuestra recomendación según tu caso particular.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preguntas - Compra -->
+        <div class="faq-section" data-category="compra">
+            <h2 class="faq-section-title">
+                <span class="faq-section-icon">🛒</span>
+                Proceso de Compra
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Cómo funciona el proceso después de recibir una recomendación?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Una vez que te recomendamos un producto, el proceso típico es:</p>
+                    <ol>
+                        <li><strong>Revisas la recomendación:</strong> Analizas las opciones que te presentamos</li>
+                        <li><strong>Te orientamos sobre dónde comprar:</strong> Te sugerimos tiendas confiables</li>
+                        <li><strong>Verificas disponibilidad:</strong> Contactas directamente con el vendedor</li>
+                        <li><strong>Realizas la compra:</strong> Directamente con el vendedor de tu elección</li>
+                        <li><strong>Seguimiento (opcional):</strong> Puedes consultarnos si tienes dudas durante o después de la compra</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Me ayudan a comprar el producto?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Podemos orientarte en el proceso de compra:</p>
+                    <ul>
+                        <li>Te recomendamos tiendas confiables donde comprar</li>
+                        <li>Te explicamos qué preguntar al vendedor</li>
+                        <li>Te asesoramos sobre garantías y políticas</li>
+                        <li>Te ayudamos a verificar que sea el producto correcto</li>
+                    </ul>
+                    <p><strong>Sin embargo:</strong> La transacción de compra se realiza directamente entre tú y el vendedor. E-PeriTech no participa en la transacción comercial.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Qué hago si tengo problemas con un producto que compré?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Si tienes problemas con un producto que compraste siguiendo nuestras recomendaciones:</p>
+                    <div class="highlight-answer">
+                        <p><strong>Para problemas con el producto:</strong></p>
+                        <ul>
+                            <li>Contacta directamente al vendedor o tienda</li>
+                            <li>Consulta la garantía del fabricante</li>
+                            <li>Revisa las políticas de devolución del vendedor</li>
+                        </ul>
+                    </div>
+                    <p><strong>Cómo podemos ayudarte nosotros:</strong></p>
+                    <ul>
+                        <li>Asesorarte sobre cómo proceder con la garantía</li>
+                        <li>Explicarte qué derechos tienes como consumidor</li>
+                        <li>Orientarte en la solución de problemas técnicos</li>
+                        <li>Sugerirte alternativas si el problema persiste</li>
+                    </ul>
+                    <p>Aunque no podemos intervenir directamente en disputas entre comprador y vendedor, estamos aquí para orientarte.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Puedo devolver un producto si no me gusta?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Las políticas de devolución dependen del vendedor donde realizaste la compra, no de E-PeriTech.</p>
+                    <p><strong>Te recomendamos:</strong></p>
+                    <ul>
+                        <li>Consultar la política de devoluciones ANTES de comprar</li>
+                        <li>Solicitar esta información por escrito</li>
+                        <li>Verificar plazos, condiciones y costos</li>
+                        <li>Guardar todos los recibos y empaques originales</li>
+                    </ul>
+                    <p>Generalmente, las tiendas en Colombia ofrecen entre 5 y 30 días para devoluciones, pero cada vendedor tiene sus propias políticas.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Cómo sé si un vendedor es confiable?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Cuando te recomendamos tiendas, consideramos varios factores de confiabilidad. También puedes verificar:</p>
+                    <ul>
+                        <li><strong>Reputación online:</strong> Busca reseñas en Google, redes sociales y foros</li>
+                        <li><strong>Tiempo en el mercado:</strong> Tiendas establecidas suelen ser más confiables</li>
+                        <li><strong>Métodos de pago seguros:</strong> Prefiere pagos con protección</li>
+                        <li><strong>Políticas claras:</strong> Garantías, devoluciones y envíos bien definidos</li>
+                        <li><strong>Atención al cliente:</strong> Respuestas rápidas y profesionales</li>
+                        <li><strong>Dirección física:</strong> Tiendas con ubicación verificable</li>
+                    </ul>
+                    <div class="highlight-answer">
+                        <p><strong>Señales de alerta:</strong> Desconfía de precios excesivamente bajos, vendedores que solo aceptan transferencias sin protección, o perfiles muy nuevos sin historial.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preguntas - Técnicas -->
+        <div class="faq-section" data-category="productos">
+            <h2 class="faq-section-title">
+                <span class="faq-section-icon">⚙️</span>
+                Preguntas Técnicas
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Pueden ayudarme con compatibilidades?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>¡Absolutamente! Es una de nuestras especialidades.</strong></p>
+                    <p>Podemos ayudarte a verificar si:</p>
+                    <ul>
+                        <li>Un mouse o teclado es compatible con tu sistema operativo</li>
+                        <li>Un monitor funcionará con tu tarjeta gráfica</li>
+                        <li>Los periféricos son compatibles entre sí</li>
+                        <li>Necesitas adaptadores o cables adicionales</li>
+                        <li>Un producto funcionará con tu configuración actual</li>
+                    </ul>
+                    <p>Solo cuéntanos qué equipos tienes actualmente y qué quieres agregar, y verificaremos la compatibilidad completa.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Qué significan las especificaciones técnicas?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Entendemos que muchos términos técnicos pueden ser confusos. Parte de nuestro servicio es explicarte en lenguaje simple qué significa cada especificación y por qué es importante para tu caso específico.</p>
+                    <p><strong>Por ejemplo, te explicamos:</strong></p>
+                    <ul>
+                        <li>¿Qué es DPI y cuánto necesitas realmente?</li>
+                        <li>Diferencias entre tasa de refresco de 60Hz, 144Hz o 240Hz</li>
+                        <li>Qué significa que un teclado sea mecánico</li>
+                        <li>Ventajas de USB-C vs USB-A</li>
+                        <li>Y cualquier otra especificación que no entiendas</li>
+                    </ul>
+                    <p>No dudes en preguntarnos sobre cualquier término que no comprendas.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Ayudan con configuración de productos?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Podemos orientarte con consejos básicos de configuración y optimización:</p>
+                    <ul>
+                        <li>Cómo instalar drivers correctamente</li>
+                        <li>Ajustes recomendados para gaming</li>
+                        <li>Configuraciones para mejorar rendimiento</li>
+                        <li>Personalización de RGB y macros</li>
+                        <li>Solución de problemas comunes</li>
+                    </ul>
+                    <p>Para soporte técnico avanzado o reparaciones, deberás contactar al fabricante o servicio técnico especializado.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Qué diferencia hay entre marcas premium y económicas?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Las marcas premium generalmente ofrecen:</p>
+                    <ul>
+                        <li><strong>Mejor calidad de materiales:</strong> Más durabilidad</li>
+                        <li><strong>Tecnología avanzada:</strong> Sensores más precisos, mejores switches</li>
+                        <li><strong>Garantías extensas:</strong> Mayor respaldo post-venta</li>
+                        <li><strong>Software robusto:</strong> Más opciones de personalización</li>
+                        <li><strong>Diseño refinado:</strong> Mejor acabado y ergonomía</li>
+                    </ul>
+                    <p>Las marcas económicas pueden ofrecer:</p>
+                    <ul>
+                        <li>Buena relación calidad-precio para usuarios básicos</li>
+                        <li>Funcionalidades suficientes para uso estándar</li>
+                        <li>Menor inversión inicial</li>
+                    </ul>
+                    <p><strong>Nuestra recomendación:</strong> Depende de tu uso. Para gaming profesional o trabajo intensivo, vale la pena invertir en premium. Para uso casual, las marcas económicas pueden ser suficientes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preguntas - Garantías -->
+        <div class="faq-section" data-category="compra">
+            <h2 class="faq-section-title">
+                <span class="faq-section-icon">🛡️</span>
+                Garantías y Soporte
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Qué cubre la garantía de un producto?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>La cobertura de garantía varía según el fabricante, pero típicamente incluye:</p>
+                    <p><strong>✅ SÍ cubre:</strong></p>
+                    <ul>
+                        <li>Defectos de fabricación</li>
+                        <li>Fallos por materiales defectuosos</li>
+                        <li>Mal funcionamiento sin causa aparente</li>
+                        <li>Componentes que dejan de funcionar</li>
+                    </ul>
+                    <p><strong>❌ NO cubre:</strong></p>
+                    <ul>
+                        <li>Daños por caídas o golpes</li>
+                        <li>Exposición a líquidos</li>
+                        <li>Modificaciones no autorizadas</li>
+                        <li>Uso inadecuado o negligencia</li>
+                        <li>Desgaste cosmético normal</li>
+                        <li>Daños por voltaje incorrecto</li>
+                    </ul>
+                    <p>Siempre lee los términos específicos de garantía de tu producto.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Cuánto tiempo dura la garantía?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Los períodos de garantía varían por marca y producto:</p>
+                    <ul>
+                        <li><strong>Marcas premium:</strong> Típicamente 2-5 años</li>
+                        <li><strong>Marcas estándar:</strong> Generalmente 1-2 años</li>
+                        <li><strong>Marcas económicas:</strong> Usualmente 6-12 meses</li>
+                        <li><strong>Algunos productos específicos:</strong> Pueden tener garantía de por vida</li>
+                    </ul>
+                    <p>En nuestras recomendaciones siempre especificamos el período de garantía para que lo consideres en tu decisión.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Qué hago si mi producto falla?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>Pasos recomendados:</strong></p>
+                    <ol>
+                        <li><strong>Documenta el problema:</strong> Toma fotos/videos si es posible</li>
+                        <li><strong>Revisa la garantía:</strong> Verifica que el problema esté cubierto</li>
+                        <li><strong>Contacta al vendedor primero:</strong> Muchas tiendas gestionan garantías</li>
+                        <li><strong>Si no hay solución:</strong> Contacta directamente al fabricante</li>
+                        <li><strong>Mantén evidencia:</strong> Guarda toda comunicación por escrito</li>
+                    </ol>
+                    <div class="highlight-answer">
+                        <p><strong>Importante:</strong> Nunca abras el producto ni intentes repararlo tú mismo, esto anula la garantía.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preguntas - Marcas -->
+        <div class="faq-section" data-category="productos">
+            <h2 class="faq-section-title">
+                <span class="faq-section-icon">🏷️</span>
+                Sobre Marcas
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Por qué recomiendan ciertas marcas?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Nuestras recomendaciones de marcas se basan en:</p>
+                    <ul>
+                        <li><strong>Calidad probada:</strong> Historial de productos confiables</li>
+                        <li><strong>Soporte al cliente:</strong> Buen servicio post-venta</li>
+                        <li><strong>Garantías sólidas:</strong> Respaldo efectivo</li>
+                        <li><strong>Innovación:</strong> Actualización constante de tecnología</li>
+                        <li><strong>Reputación:</strong> Valoración de la comunidad tech</li>
+                        <li><strong>Disponibilidad:</strong> Fácil de conseguir en Colombia</li>
+                    </ul>
+                    <p>No tenemos acuerdos exclusivos con marcas, por lo que nuestras recomendaciones son objetivas.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Puedo consultar sobre una marca que no está en su catálogo?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>¡Por supuesto!</strong> Aunque tenemos marcas principales en nuestro catálogo, podemos asesorarte sobre cualquier marca del mercado.</p>
+                    <p>Si estás considerando una marca específica, solo menciónanosla y:</p>
+                    <ul>
+                        <li>Investigaremos sus productos</li>
+                        <li>Evaluaremos su reputación</li>
+                        <li>Verificaremos disponibilidad de soporte en Colombia</li>
+                        <li>Te daremos nuestra opinión honesta</li>
+                        <li>La compararemos con alternativas si es necesario</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Vale la pena comprar marcas importadas?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Depende de varios factores:</p>
+                    <p><strong>Ventajas:</strong></p>
+                    <ul>
+                        <li>Posible ahorro en precio</li>
+                        <li>Acceso a productos no disponibles localmente</li>
+                        <li>Mayor variedad de opciones</li>
+                    </ul>
+                    <p><strong>Desventajas:</strong></p>
+                    <ul>
+                        <li>Tiempos de envío más largos</li>
+                        <li>Posibles costos de importación/aduana</li>
+                        <li>Garantía más difícil de reclamar</li>
+                        <li>Riesgo en el envío</li>
+                        <li>Soporte técnico limitado</li>
+                    </ul>
+                    <p><strong>Nuestra recomendación:</strong> Para productos de alto valor, preferible comprar localmente por el respaldo. Para accesorios menores, la importación puede ser viable.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preguntas - Seguridad -->
+        <div class="faq-section" data-category="general">
+            <h2 class="faq-section-title">
+                <span class="faq-section-icon">🔒</span>
+                Seguridad y Privacidad
+            </h2>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Qué hacen con mi información personal?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Tu privacidad es importante para nosotros. Usamos tu información únicamente para:</p>
+                    <ul>
+                        <li>Proporcionar asesoramiento personalizado</li>
+                        <li>Responder a tus consultas</li>
+                        <li>Mejorar nuestros servicios</li>
+                        <li>Enviar información relevante (solo si lo autorizas)</li>
+                    </ul>
+                    <p><strong>Nunca:</strong></p>
+                    <ul>
+                        <li>Vendemos tu información a terceros</li>
+                        <li>Compartimos tus datos sin consentimiento</li>
+                        <li>Usamos tu información para fines no autorizados</li>
+                    </ul>
+                    <p>Para más detalles, consulta nuestra <a href="terminos.html" style="color: #667eea;">Política de Privacidad</a>.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    ¿Es seguro compartir información de mis equipos actuales?
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p><strong>Sí, es completamente seguro.</strong> Cuando nos compartes información sobre tus equipos actuales para verificar compatibilidades:</p>
+                    <ul>
+                        <li>Solo usamos esa información para asesorarte</li>
+                        <li>No almacenamos datos sensibles innecesariamente</li>
+                        <li>Tu información técnica no se comparte con terceros</li>
+                        <li>Respetamos estrictamente tu privacidad</li>
+                    </ul>
+                    <p>Necesitamos saber qué equipos tienes para darte las mejores recomendaciones de compatibilidad.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sin Resultados -->
+        <div class="no-results" id="noResults" style="display: none;">
+            <div class="no-results-icon">🔍</div>
+            <h2>No encontramos resultados</h2>
+            <p>Intenta con otros términos de búsqueda o contáctanos directamente</p>
+        </div>
+
+        <!-- CTA de Contacto -->
+        <div class="contact-cta">
+            <h2>¿No encontraste tu respuesta?</h2>
+            <p>Nuestro equipo está listo para ayudarte con cualquier duda que tengas</p>
+            <div class="cta-buttons">
+                <a href="contacto.html" class="btn-cta btn-cta-primary">Contactar Ahora</a>
+                <a href="https://wa.me/573001234567" target="_blank" class="btn-cta btn-cta-secondary">💬 WhatsApp</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>🖥️ E-PeriTech</h3>
+                <p>Tu plataforma de confianza para asesoramiento en periféricos y tecnología. Información precisa y recomendaciones honestas.</p>
+                <div class="social-icons">
+                    <div class="social-icon">📘</div>
+                    <div class="social-icon">📷</div>
+                    <div class="social-icon">🐦</div>
+                    <div class="social-icon">📺</div>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Información</h3>
+                <ul>
+                    <li><a href="nosotros.html">Sobre Nosotros</a></li>
+                    <li><a href="terminos.html">Términos y Condiciones</a></li>
+                    <li><a href="faq.html">Política de Privacidad</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Atención al Cliente</h3>
+                <ul>
+                    <li><a href="faq.html">Preguntas Frecuentes</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contacto</h3>
+                <ul>
+                    <li>📞 +57 3185838072</li>
+                    <li>📧est_sm_morgensztern@fesc.edu.co</li>
+                    <li>📍 Cúcuta, Colombia</li>
+                    <li>🕐 Lun-Vie: 9am-6pm</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 E-PeriTech. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+
+        // Toggle FAQ
+        function toggleFAQ(element) {
+            const faqItem = element.parentElement;
+            const allItems = document.querySelectorAll('.faq-item');
+            
+            // Cerrar otros items
+            allItems.forEach(item => {
+                if (item !== faqItem) {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // Toggle item actual
+            faqItem.classList.toggle('active');
+        }
+
+        // Filtrar por categoría
+        function filterCategory(category) {
+            const sections = document.querySelectorAll('.faq-section');
+            const buttons = document.querySelectorAll('.category-btn');
+            const noResults = document.getElementById('noResults');
+            
+            // Actualizar botones activos
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.category-btn').classList.add('active');
+            
+            // Mostrar/ocultar secciones
+            let hasVisibleSections = false;
+            sections.forEach(section => {
+                if (category === 'all' || section.dataset.category === category) {
+                    section.style.display = 'block';
+                    hasVisibleSections = true;
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+            
+            noResults.style.display = hasVisibleSections ? 'none' : 'block';
+        }
+
+        // Buscar en FAQ
+        function searchFAQ() {
+            const searchTerm = document.getElementById('searchFAQ').value.toLowerCase();
+            const faqItems = document.querySelectorAll('.faq-item');
+            const sections = document.querySelectorAll('.faq-section');
+            const noResults = document.getElementById('noResults');
+            let hasResults = false;
+            
+            if (searchTerm === '') {
+                // Mostrar todo
+                sections.forEach(section => section.style.display = 'block');
+                faqItems.forEach(item => item.style.display = 'block');
+                noResults.style.display = 'none';
+                return;
+            }
+            
+            // Buscar en preguntas y respuestas
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+                
+                if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                    item.style.display = 'block';
+                    item.parentElement.style.display = 'block';
+                    hasResults = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Ocultar secciones sin resultados
+            sections.forEach(section => {
+                const visibleItems = section.querySelectorAll('.faq-item[style="display: block;"]');
+                if (visibleItems.length === 0) {
+                    section.style.display = 'none';
+                }
+            });
+            
+            noResults.style.display = hasResults ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>

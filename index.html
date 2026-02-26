@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-PeriTech - Periféricos y Computadores</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header Top -->
+    <div class="header-top">
+        Expertos en hardware, aliados de tu bolsillo.💸
+    </div>
+
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">🖥️ E-PeriTech</div>
+            
+            <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
+            
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="#productos">Productos</a></li>
+                <li><a href="ofertas.html">Ofertas</a></li>
+                <li><a href="marcas.html">Marcas</a></li>
+                <li><a href="contacto.html">¿Dudas?</a></li>
+            </ul>
+
+            <div class="nav-icons">
+                <button class="icon-btn" onclick="toggleSearch()">🔍</button>
+                <button class="icon-btn compare-btn" onclick="window.location.href='comparar.html'" title="Comparar productos">
+                    ⚖️
+                    <span class="compare-badge" id="compareBadge">0</span>
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Search Bar -->
+        <div class="search-container" id="searchContainer">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Buscar productos... (ej: mouse, teclado, monitor)" 
+                    onkeyup="searchProducts()"
+                >
+                <button class="search-close-btn" onclick="toggleSearch()">✕</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="hero">
+        <h1>🎮 Equipos Gamer de Alto Rendimiento</h1>
+        <p>Encuentra los mejores periféricos y computadores para gaming</p>
+        <button class="btn-primary" onclick="scrollToProducts()">Ver Productos</button>
+    </section>
+
+    <!-- Categories -->
+    <div class="container">
+        <h2 class="section-title">Categorías Populares</h2>
+        <div class="categories">
+            <div class="category-card" onclick="filterCategory('mouse')">
+                <div class="category-icon">🖱️</div>
+                <h3>Mouses</h3>
+                <p>Gaming y Oficina</p>
+            </div>
+            <div class="category-card" onclick="filterCategory('teclado')">
+                <div class="category-icon">⌨️</div>
+                <h3>Teclados</h3>
+                <p>Mecánicos y RGB</p>
+            </div>
+            <div class="category-card" onclick="filterCategory('monitor')">
+                <div class="category-icon">🖥️</div>
+                <h3>Monitores</h3>
+                <p>Alta Frecuencia</p>
+            </div>
+            <div class="category-card" onclick="filterCategory('audifonos')">
+                <div class="category-icon">🎧</div>
+                <h3>Audífonos</h3>
+                <p>Sonido Premium</p>
+            </div>
+        </div>
+
+        <!-- Products -->
+        <h2 class="section-title" id="productos">Productos Destacados</h2>
+        <div class="search-info" id="searchInfo"></div>
+        <div class="products-grid" id="productsGrid">
+            <!-- Products will be inserted here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>🖥️ E-PeriTech</h3>
+                <p>Tu plataforma de confianza para asesoramiento en periféricos y tecnología. Información precisa y recomendaciones honestas.</p>
+                <div class="social-icons">
+                    <div class="social-icon">📘</div>
+                    <div class="social-icon">📷</div>
+                    <div class="social-icon">🐦</div>
+                    <div class="social-icon">📺</div>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Información</h3>
+                <ul>
+                    <li><a href="nosotros.html">Sobre Nosotros</a></li>
+                    <li><a href="terminos.html">Términos y Condiciones</a></li>
+                    <li><a href="faq.html">Política de Privacidad</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Atención al Cliente</h3>
+                <ul>
+                    <li><a href="faq.html">Preguntas Frecuentes</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contacto</h3>
+                <ul>
+                    <li>📞 +57 3185838072</li>
+                    <li>📧est_sm_morgensztern@fesc.edu.co</li>
+                    <li>📍 Cúcuta, Colombia</li>
+                    <li>🕐 Lun-Vie: 9am-6pm</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2025 E-PeriTech. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
