@@ -179,11 +179,11 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
                         <div class="form-group">
                             <label>Precio actual (COP) *</label>
-                            <input id="mPrice" type="number" placeholder="319000" min="0">
+                            <input id="mPrice" type="text" placeholder="319000" min="0">
                         </div>
                         <div class="form-group">
                             <label>Precio anterior (COP)</label>
-                            <input id="mOldPrice" type="number" placeholder="Dejar vacío si no hay descuento" min="0">
+                            <input id="mOldPrice" type="text" placeholder="Dejar vacío si no hay descuento" min="0">
                         </div>
                     </div>
                     <div class="form-group">
@@ -238,65 +238,66 @@
 <script>
     DB.requireRole('proveedor','login.html');
     const session = DB.getSession();
-    const user    = DB.getUserById(session.userId);
-    document.getElementById('sidebarUser').textContent = '🏭 ' + user.nombre;
 
-    // showPage se define más abajo con soporte para catálogo
+    let user = null;
+    let _allProducts = [];
+
+    async function init() {
+        user = await DB.getUserById(session.userId);
+        document.getElementById('sidebarUser').textContent = '🏭 ' + user.nombre;
+        renderInicio();
+    }
 
     function fmtDate(iso){ return new Date(iso).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}); }
     function fmtMoney(n){ return '$'+Number(n).toLocaleString('es-CO'); }
     function badge(text,cls){ return `<span class="badge badge-${cls}">${text}</span>`; }
 
-    function renderInicio() {
+    async function renderInicio() {
         document.getElementById('welcomeSub').textContent = 'Empresa: ' + (user.empresa||user.nombre);
-        const banner = document.getElementById('verifyBanner');
-        banner.style.display = user.verificado ? 'none' : 'block';
+        document.getElementById('verifyBanner').style.display = user.verificado ? 'none' : 'block';
 
-        const orders = DB.getOrders();
+        const orders = await DB.getOrders();
         document.getElementById('provStats').innerHTML = `
             <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-value">${orders.length}</div><div class="stat-label">Órdenes totales</div></div>
             <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value">${orders.filter(o=>o.estado==='pendiente').length}</div><div class="stat-label">Pendientes</div></div>
             <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value">${orders.filter(o=>o.estado==='entregado').length}</div><div class="stat-label">Entregadas</div></div>
             <div class="stat-card"><div class="stat-icon">${user.verificado?'✅':'⏳'}</div><div class="stat-value" style="font-size:18px;">${user.verificado?'Verificada':'Pendiente'}</div><div class="stat-label">Estado de cuenta</div></div>
         `;
-
-        const last5 = orders.slice(-5).reverse();
+        const last5 = orders.slice(0,5);
         document.getElementById('provOrders').innerHTML = last5.map(o=>`
             <tr>
                 <td><code style="font-size:11px;">${o.id}</code></td>
-                <td>${o.productos.map(p=>p.nombre).join(', ')}</td>
+                <td>${(o.productos||[]).map(p=>p.nombre_snap||p.nombre).join(', ')}</td>
                 <td>${fmtMoney(o.total)}</td>
                 <td>${badge(o.estado,o.estado)}</td>
                 <td>${fmtDate(o.fecha)}</td>
             </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:#aaa;">Sin órdenes</td></tr>';
     }
 
-    function renderOrdenesProv() {
-        const orders = DB.getOrders().slice().reverse();
-        document.getElementById('tablaOrdenesProv').innerHTML = orders.map(o=>{
-            const u = DB.getUserById(o.compradorId);
-            return `<tr>
+    async function renderOrdenesProv() {
+        const orders = (await DB.getOrders()).slice().reverse();
+        document.getElementById('tablaOrdenesProv').innerHTML = orders.map(o=>`
+            <tr>
                 <td><code style="font-size:11px;">${o.id}</code></td>
-                <td>${u?u.nombre+' '+u.apellido:o.compradorId}</td>
-                <td>${o.productos.map(p=>p.nombre).join(', ')}</td>
+                <td>${o.comprador_nombre ? o.comprador_nombre+' '+o.comprador_apellido : o.comprador_id}</td>
+                <td>${(o.productos||[]).map(p=>p.nombre_snap||p.nombre).join(', ')}</td>
                 <td>${fmtMoney(o.total)}</td>
                 <td>${badge(o.estado,o.estado)}</td>
                 <td>${fmtDate(o.fecha)}</td>
-            </tr>`;
-        }).join('') || '<tr><td colspan="6" style="text-align:center;color:#aaa;">Sin órdenes</td></tr>';
+            </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:#aaa;">Sin órdenes</td></tr>';
     }
 
-    function loadPerfil() {
-        const u = DB.getUserById(session.userId);
-        document.getElementById('pNombre').value   = u.nombre   || '';
-        document.getElementById('pApellido').value = u.apellido || '';
-        document.getElementById('pTelefono').value = u.telefono || '';
-        document.getElementById('pEmpresa').value  = u.empresa  || '';
-        document.getElementById('pNit').value      = u.nit      || '';
-        document.getElementById('pDir').value      = u.direccion|| '';
+    async function loadPerfil() {
+        const u = await DB.getUserById(session.userId);
+        document.getElementById('pNombre').value   = u.nombre    || '';
+        document.getElementById('pApellido').value = u.apellido  || '';
+        document.getElementById('pTelefono').value = u.telefono  || '';
+        document.getElementById('pEmpresa').value  = u.empresa   || '';
+        document.getElementById('pNit').value      = u.nit       || '';
+        document.getElementById('pDir').value      = u.direccion || '';
     }
 
-    function saveProfile(e) {
+    async function saveProfile(e) {
         e.preventDefault();
         const changes = {
             nombre:    document.getElementById('pNombre').value.trim(),
@@ -308,16 +309,16 @@
         };
         const pass = document.getElementById('pPass').value;
         if(pass) changes.password = pass;
-        const res = DB.updateUser(session.userId, changes);
+        const res = await DB.updateUser(session.userId, changes);
         const msg = document.getElementById('perfilMsg');
-        if(res.ok){ msg.textContent='✅ Perfil actualizado.'; msg.className='msg success'; }
+        if(res.ok){ msg.textContent='✅ Perfil actualizado.'; msg.className='msg success'; user={...user,...changes}; }
         else      { msg.textContent=res.msg;                  msg.className='msg error'; }
         setTimeout(()=>{ msg.className='msg'; }, 3000);
     }
 
-    function doLogout(){ DB.logout(); window.location.href='login.html'; }
+    async function doLogout(){ await DB.logout(); window.location.href='login.html'; }
 
-    // ─── CATÁLOGO CRUD ───────────────────────────────────────────────────
+    // ─── CATÁLOGO CRUD ─────────────────────────────────────────────────
     let currentTab = 'mios';
 
     function switchTab(tab) {
@@ -327,26 +328,24 @@
         renderCatalog();
     }
 
-    function renderCatalog() {
-        const all = DB.getProducts().filter(p => p.activo !== false);
+    async function renderCatalog() {
+        _allProducts = await DB.getProducts();
         const list = currentTab === 'mios'
-            ? all.filter(p => p.proveedorId === session.userId)
-            : all;
+            ? _allProducts.filter(p => String(p.proveedor_id) === String(session.userId))
+            : _allProducts;
 
         const grid = document.getElementById('catalogGrid');
-
         if (list.length === 0) {
             grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px;color:#aaa;">
                 <div style="font-size:48px;margin-bottom:12px;">📦</div>
-                <p>${currentTab === 'mios' ? 'Aún no tienes productos. ¡Agrega el primero!' : 'No hay productos en el catálogo.'}</p>
+                <p>${currentTab === 'mios' ? 'Aún no tienes productos. ¡Agrega el primero!' : 'No hay productos.'}</p>
             </div>`;
             return;
         }
 
         grid.innerHTML = list.map(p => {
-            const esMio = p.proveedorId === session.userId;
-            return `
-            <div class="catalog-card">
+            const esMio = String(p.proveedor_id) === String(session.userId);
+            return `<div class="catalog-card">
                 <div class="catalog-icon">${p.icon || '📦'}</div>
                 <div class="catalog-name">${p.name}</div>
                 <div class="catalog-cat">${p.category}</div>
@@ -363,14 +362,14 @@
         }).join('');
     }
 
-    function openModal(productId) {
+    async function openModal(productId) {
         const modal = document.getElementById('productModal');
         document.getElementById('modalMsg').className = 'msg';
         document.getElementById('mId').value = '';
 
         if (productId) {
-            const p = DB.getProducts().find(x => x.id === productId);
-            if (!p || p.proveedorId !== session.userId) return;
+            const p = _allProducts.find(x => x.id === productId) || await DB._get('productos','get',{id:productId}).then(r=>r.product);
+            if (!p) return;
             document.getElementById('modalTitle').textContent = '✏️ Editar Producto';
             document.getElementById('mId').value       = p.id;
             document.getElementById('mName').value     = p.name;
@@ -381,22 +380,15 @@
             document.getElementById('mDesc').value     = p.description || '';
         } else {
             document.getElementById('modalTitle').textContent = '➕ Nuevo Producto';
-            document.getElementById('mName').value     = '';
+            ['mName','mIcon','mPrice','mOldPrice','mDesc'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('mCategory').value = 'mouse';
-            document.getElementById('mIcon').value     = '';
-            document.getElementById('mPrice').value    = '';
-            document.getElementById('mOldPrice').value = '';
-            document.getElementById('mDesc').value     = '';
         }
-
         modal.style.display = 'flex';
     }
 
-    function closeModal() {
-        document.getElementById('productModal').style.display = 'none';
-    }
+    function closeModal() { document.getElementById('productModal').style.display = 'none'; }
 
-    function saveProduct() {
+    async function saveProduct() {
         const id       = document.getElementById('mId').value;
         const name     = document.getElementById('mName').value.trim();
         const category = document.getElementById('mCategory').value;
@@ -404,58 +396,48 @@
         const price    = document.getElementById('mPrice').value;
         const oldPrice = document.getElementById('mOldPrice').value;
         const desc     = document.getElementById('mDesc').value.trim();
-        const msgEl    = document.getElementById('modalMsg');
 
         if (!name)  return showModalMsg('El nombre es obligatorio.', 'error');
         if (!price || Number(price) <= 0) return showModalMsg('Ingresa un precio válido.', 'error');
         if (oldPrice && Number(oldPrice) <= Number(price)) return showModalMsg('El precio anterior debe ser mayor al actual.', 'error');
 
         const data = { name, category, icon, price, oldPrice, description: desc };
-        let result;
-
-        if (id) {
-            result = DB.updateProduct(Number(id), data);
-        } else {
-            result = DB.createProduct(data, session.userId);
-        }
+        const result = id
+            ? await DB.updateProduct(Number(id), data)
+            : await DB.createProduct(data, session.userId);
 
         if (result.ok) {
-            showModalMsg('✅ Producto guardado correctamente.', 'success');
+            showModalMsg('✅ Producto guardado.', 'success');
             setTimeout(() => { closeModal(); renderCatalog(); }, 900);
         } else {
             showModalMsg(result.msg || 'Error al guardar.', 'error');
         }
     }
 
-    function deleteProduct(productId) {
-        const p = DB.getProducts().find(x => x.id === productId);
-        if (!p || p.proveedorId !== session.userId) return;
-        if (!confirm(`¿Eliminar "${p.name}"? Esta acción no se puede deshacer.`)) return;
-        DB.deleteProduct(productId);
+    async function deleteProduct(productId) {
+        const p = _allProducts.find(x => x.id === productId);
+        if (!confirm(`¿Eliminar "${p ? p.name : 'este producto'}"?`)) return;
+        await DB.deleteProduct(productId);
         renderCatalog();
         showCatalogMsg('🗑️ Producto eliminado.', 'success');
     }
 
     function showModalMsg(text, type) {
         const el = document.getElementById('modalMsg');
-        el.textContent = text;
-        el.className = 'msg ' + type;
+        el.textContent = text; el.className = 'msg ' + type;
         setTimeout(() => el.className = 'msg', 3000);
     }
 
     function showCatalogMsg(text, type) {
         const el = document.getElementById('catalogMsg');
-        el.textContent = text;
-        el.className = 'msg ' + type;
+        el.textContent = text; el.className = 'msg ' + type;
         setTimeout(() => el.className = 'msg', 3000);
     }
 
-    // Cerrar modal al hacer click fuera
     document.getElementById('productModal').addEventListener('click', function(e) {
         if (e.target === this) closeModal();
     });
 
-    // Inicializar página de catálogo cuando se abre
     function showPage(name) {
         document.querySelectorAll('.page-panel').forEach(p=>p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -467,7 +449,7 @@
         if(name==='catalogo') renderCatalog();
     }
 
-    renderInicio();
+    init();
 </script>
 </body>
 </html>

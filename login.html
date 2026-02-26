@@ -368,17 +368,18 @@
                 role === 'proveedor' ? 'block' : 'none';
         }
 
-        function doLogin() {
+        async function doLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             const pass  = document.getElementById('loginPass').value;
             if (!email || !pass) { showMsg('Por favor completa todos los campos.', 'error'); return; }
-            const res = DB.login(email, pass);
+            showMsg('Verificando...', 'info');
+            const res = await DB.login(email, pass);
             if (!res.ok) { showMsg(res.msg, 'error'); return; }
-            showMsg('✅ Bienvenido, ' + res.user.nombre + '! Redirigiendo...', 'success');
-            setTimeout(() => redirectByRole(res.user.role), 900);
+            showMsg('✅ Bienvenido, ' + res.session.nombre + '! Redirigiendo...', 'success');
+            setTimeout(() => redirectByRole(res.session.role), 900);
         }
 
-        function doRegister() {
+        async function doRegister() {
             const nombre   = document.getElementById('regNombre').value.trim();
             const apellido = document.getElementById('regApellido').value.trim();
             const email    = document.getElementById('regEmail').value.trim();
@@ -398,12 +399,13 @@
             if (role === 'proveedor' && !empresa)
                 return showMsg('Ingresa el nombre de tu empresa.', 'error');
 
-            const res = DB.createUser({ nombre, apellido, email, password: pass, telefono, role, empresa, nit });
+            showMsg('Creando cuenta...', 'info');
+            const res = await DB.createUser({ nombre, apellido, email, password: pass, telefono, role, empresa, nit });
             if (!res.ok) return showMsg(res.msg, 'error');
 
-            showMsg('✅ Cuenta creada correctamente. Iniciando sesión...', 'success');
-            const loginRes = DB.login(email, pass);
-            setTimeout(() => redirectByRole(loginRes.user.role), 1000);
+            showMsg('✅ Cuenta creada. Iniciando sesión...', 'success');
+            const loginRes = await DB.login(email, pass);
+            setTimeout(() => redirectByRole(loginRes.session.role), 1000);
         }
 
         document.addEventListener('keydown', e => {

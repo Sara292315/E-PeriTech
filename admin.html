@@ -396,67 +396,37 @@
     function fmtDate(iso) {
         return new Date(iso).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});
     }
-    function fmtMoney(n) {
-        return '$' + Number(n).toLocaleString('es-CO');
-    }
-    function badge(text, cls) {
-        return `<span class="badge badge-${cls}">${text}</span>`;
-    }
+    function fmtMoney(n) { return '$' + Number(n).toLocaleString('es-CO'); }
+    function badge(text, cls) { return `<span class="badge badge-${cls}">${text}</span>`; }
 
     // ── DASHBOARD
-    function renderDashboard() {
-        const s = DB.getStats();
+    async function renderDashboard() {
+        const s    = await DB.getStats();
         const grid = document.getElementById('statsGrid');
         grid.innerHTML = `
-            <div class="stat-card blue">
-                <div class="stat-icon">👥</div>
-                <div class="stat-value">${s.totalUsuarios}</div>
-                <div class="stat-label">Usuarios totales</div>
-            </div>
-            <div class="stat-card green">
-                <div class="stat-icon">🛒</div>
-                <div class="stat-value">${s.totalCompradores}</div>
-                <div class="stat-label">Compradores</div>
-            </div>
-            <div class="stat-card purple">
-                <div class="stat-icon">🏭</div>
-                <div class="stat-value">${s.totalProveedores}</div>
-                <div class="stat-label">Proveedores</div>
-            </div>
-            <div class="stat-card red">
-                <div class="stat-icon">📦</div>
-                <div class="stat-value">${s.totalOrdenes}</div>
-                <div class="stat-label">Órdenes</div>
-            </div>
-            <div class="stat-card green">
-                <div class="stat-icon">💰</div>
-                <div class="stat-value" style="font-size:22px;">${fmtMoney(s.ingresoTotal)}</div>
-                <div class="stat-label">Ingresos totales</div>
-            </div>
-            <div class="stat-card red">
-                <div class="stat-icon">⏳</div>
-                <div class="stat-value">${s.ordenesPendientes}</div>
-                <div class="stat-label">Órdenes pendientes</div>
-            </div>
+            <div class="stat-card blue"><div class="stat-icon">👥</div><div class="stat-value">${s.total_usuarios||0}</div><div class="stat-label">Usuarios totales</div></div>
+            <div class="stat-card green"><div class="stat-icon">🛒</div><div class="stat-value">${s.total_compradores||0}</div><div class="stat-label">Compradores</div></div>
+            <div class="stat-card purple"><div class="stat-icon">🏭</div><div class="stat-value">${s.total_proveedores||0}</div><div class="stat-label">Proveedores</div></div>
+            <div class="stat-card red"><div class="stat-icon">📦</div><div class="stat-value">${s.total_ordenes||0}</div><div class="stat-label">Órdenes</div></div>
+            <div class="stat-card green"><div class="stat-icon">💰</div><div class="stat-value" style="font-size:22px;">${fmtMoney(s.ingreso_total||0)}</div><div class="stat-label">Ingresos totales</div></div>
+            <div class="stat-card red"><div class="stat-icon">⏳</div><div class="stat-value">${s.ordenes_pendientes||0}</div><div class="stat-label">Órdenes pendientes</div></div>
         `;
 
-        const orders = DB.getOrders().slice(-5).reverse();
-        document.getElementById('dashOrders').innerHTML = orders.map(o => {
-            const u = DB.getUserById(o.compradorId);
-            return `<tr>
-                <td><code style="font-size:12px;">${o.id}</code></td>
-                <td>${u ? u.nombre + ' ' + u.apellido : o.compradorId}</td>
-                <td>${fmtMoney(o.total)}</td>
-                <td>${badge(o.estado, o.estado)}</td>
-                <td>${fmtDate(o.fecha)}</td>
-            </tr>`;
-        }).join('') || '<tr><td colspan="5" style="text-align:center;color:#aaa;">Sin órdenes</td></tr>';
+        const orders = await DB.getOrders();
+        const last5  = orders.slice(-5).reverse();
+        document.getElementById('dashOrders').innerHTML = last5.map(o => `<tr>
+            <td><code style="font-size:12px;">${o.id}</code></td>
+            <td>${o.comprador_nombre ? o.comprador_nombre + ' ' + o.comprador_apellido : o.comprador_id}</td>
+            <td>${fmtMoney(o.total)}</td>
+            <td>${badge(o.estado, o.estado)}</td>
+            <td>${fmtDate(o.fecha)}</td>
+        </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:#aaa;">Sin órdenes</td></tr>';
     }
 
     // ── COMPRADORES
-    function renderCompradores() {
-        const q = (document.getElementById('searchComprador')?.value || '').toLowerCase();
-        const users = DB.getUsersByRole('comprador').filter(u =>
+    async function renderCompradores() {
+        const q     = (document.getElementById('searchComprador')?.value || '').toLowerCase();
+        const users = (await DB.getUsersByRole('comprador')).filter(u =>
             !q || u.nombre.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
         );
         document.getElementById('tablaCompradores').innerHTML = users.map(u => `
@@ -466,7 +436,7 @@
                 <td>${u.email}</td>
                 <td>${u.telefono || '—'}</td>
                 <td>${badge(u.activo ? 'Activo' : 'Inactivo', u.activo ? 'activo' : 'inactivo')}</td>
-                <td>${fmtDate(u.createdAt)}</td>
+                <td>${fmtDate(u.created_at)}</td>
                 <td>
                     <button class="btn-sm btn-warning-sm" onclick="toggleActive('${u.id}')">
                         ${u.activo ? '🔒 Desactivar' : '🔓 Activar'}
@@ -477,9 +447,9 @@
     }
 
     // ── PROVEEDORES
-    function renderProveedores() {
-        const q = (document.getElementById('searchProveedor')?.value || '').toLowerCase();
-        const users = DB.getUsersByRole('proveedor').filter(u =>
+    async function renderProveedores() {
+        const q     = (document.getElementById('searchProveedor')?.value || '').toLowerCase();
+        const users = (await DB.getUsersByRole('proveedor')).filter(u =>
             !q || (u.empresa||'').toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
         );
         document.getElementById('tablaProveedores').innerHTML = users.map(u => `
@@ -492,26 +462,24 @@
                 <td>${badge(u.verificado ? 'Verificado' : 'Pendiente', u.verificado ? 'verificado' : 'no-verif')}</td>
                 <td>
                     <button class="btn-sm btn-success-sm" onclick="verifyProv('${u.id}')">✅ Verificar</button>
-                    <button class="btn-sm btn-warning-sm" onclick="toggleActive('${u.id}','proveedor')">
-                        ${u.activo ? '🔒' : '🔓'}
-                    </button>
+                    <button class="btn-sm btn-warning-sm" onclick="toggleActive('${u.id}','proveedor')">${u.activo ? '🔒' : '🔓'}</button>
                     <button class="btn-sm btn-danger-sm" onclick="deleteUser('${u.id}','proveedor')">🗑️</button>
                 </td>
             </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:#aaa;">Sin proveedores</td></tr>';
     }
 
     // ── ÓRDENES
-    function renderOrdenes() {
+    async function renderOrdenes() {
         const estado = document.getElementById('filterEstado')?.value || '';
-        let orders = DB.getOrders();
+        let orders   = await DB.getOrders();
         if (estado) orders = orders.filter(o => o.estado === estado);
         orders = orders.slice().reverse();
         document.getElementById('tablaOrdenes').innerHTML = orders.map(o => {
-            const u = DB.getUserById(o.compradorId);
-            const prods = o.productos.map(p => p.nombre).join(', ');
+            const nombre = o.comprador_nombre ? o.comprador_nombre + ' ' + o.comprador_apellido : o.comprador_id;
+            const prods  = (o.productos || []).map(p => p.nombre_snap || p.nombre).join(', ');
             return `<tr>
                 <td><code style="font-size:11px;">${o.id}</code></td>
-                <td>${u ? u.nombre + ' ' + u.apellido : o.compradorId}</td>
+                <td>${nombre}</td>
                 <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${prods}">${prods}</td>
                 <td>${fmtMoney(o.total)}</td>
                 <td>${badge(o.estado, o.estado)}</td>
@@ -520,6 +488,8 @@
                     <select style="padding:5px;border:1px solid #ddd;border-radius:6px;font-size:12px;"
                         onchange="changeOrderStatus('${o.id}',this.value)">
                         <option ${o.estado==='pendiente'?'selected':''} value="pendiente">Pendiente</option>
+                        <option ${o.estado==='procesando'?'selected':''} value="procesando">Procesando</option>
+                        <option ${o.estado==='enviado'?'selected':''} value="enviado">Enviado</option>
                         <option ${o.estado==='entregado'?'selected':''} value="entregado">Entregado</option>
                         <option ${o.estado==='cancelado'?'selected':''} value="cancelado">Cancelado</option>
                     </select>
@@ -529,27 +499,27 @@
     }
 
     // ── ACTIONS
-    function toggleActive(id, page) {
-        const u = DB.getUserById(id);
-        DB.updateUser(id, { activo: !u.activo });
+    async function toggleActive(id, page) {
+        const u = await DB.getUserById(id);
+        if (!u) return;
+        await DB.updateUser(id, { activo: u.activo ? 0 : 1 });
         page === 'proveedor' ? renderProveedores() : renderCompradores();
     }
 
-    function verifyProv(id) {
-        DB.updateUser(id, { verificado: true });
+    async function verifyProv(id) {
+        await DB.updateUser(id, { verificado: 1 });
         renderProveedores();
     }
 
-    function deleteUser(id, page) {
+    async function deleteUser(id, page) {
         if (!confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) return;
-        DB.deleteUser(id);
+        await DB.deleteUser(id);
         page === 'proveedor' ? renderProveedores() : renderCompradores();
         renderDashboard();
     }
 
-    function changeOrderStatus(id, estado) {
-        DB.updateOrderStatus(id, estado);
-        renderOrdenes();
+    async function changeOrderStatus(id, estado) {
+        await DB.updateOrderStatus(id, estado);
     }
 
     // ── MODAL
@@ -575,7 +545,7 @@
 
     function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 
-    function submitModal() {
+    async function submitModal() {
         const nombre   = document.getElementById('mNombre')?.value.trim();
         const apellido = document.getElementById('mApellido')?.value.trim();
         const email    = document.getElementById('mEmail')?.value.trim();
@@ -587,7 +557,7 @@
         if (!nombre || !apellido || !email || !pass)
             return alert('Completa todos los campos obligatorios.');
 
-        const res = DB.createUser({ nombre, apellido, email, telefono, password: pass,
+        const res = await DB.createUser({ nombre, apellido, email, telefono, password: pass,
             role: _modalRole, empresa, nit });
         if (!res.ok) return alert(res.msg);
         closeModal();
@@ -595,7 +565,7 @@
         renderDashboard();
     }
 
-    function doLogout() { DB.logout(); window.location.href = 'login.html'; }
+    async function doLogout() { await DB.logout(); window.location.href = 'login.html'; }
 
     // Init
     renderDashboard();
