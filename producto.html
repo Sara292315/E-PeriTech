@@ -349,6 +349,14 @@
                     </button>
                 </div>
 
+                <!-- Botón eliminar (visible solo para admin o proveedor dueño) -->
+                <div id="adminActions" style="display:none;margin-top:14px;">
+                    <button onclick="deleteCurrentProduct()"
+                        style="width:100%;padding:12px;background:#ef4444;color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">
+                        🗑️ Eliminar este producto
+                    </button>
+                </div>
+
                 <div class="product-meta">
                     <div class="meta-item">
                         <span class="meta-label">Categoría:</span>
@@ -430,10 +438,7 @@
     <script>
     // Agregar producto actual al carrito
     function addCurrentToCart() {
-        const id   = parseInt(localStorage.getItem('selectedProduct'));
-        if (!id) return;
-        // products está definido en script.js
-        const product = (typeof products !== 'undefined') ? products.find(p => p.id === id) : null;
+        const product = window._currentProduct;
         if (!product) { Cart.showToast('❌ Producto no encontrado'); return; }
         Cart.addItem(product);
     }

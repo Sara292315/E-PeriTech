@@ -79,14 +79,16 @@ const DB = {
         if (!res.ok) return [];
         return res.data.map(p => ({
             ...p,
-            id:       parseInt(p.id),
-            name:     p.nombre,
-            category: p.categoria,
-            price:    parseFloat(p.precio),
-            oldPrice: p.precio_viejo ? parseFloat(p.precio_viejo) : null,
-            discount: parseInt(p.descuento) || 0,
-            icon:     p.icono,
-            activo:   !!parseInt(p.activo),
+            id:           parseInt(p.id),
+            name:         p.nombre,
+            category:     p.categoria,
+            price:        parseFloat(p.precio),
+            oldPrice:     p.precio_viejo ? parseFloat(p.precio_viejo) : null,
+            discount:     parseInt(p.descuento) || 0,
+            icon:         p.icono,
+            activo:       !!parseInt(p.activo),
+            proveedor_id: p.proveedor_id || null,   // ← campo clave para filtrar
+            description:  p.descripcion  || '',
         }));
     },
 

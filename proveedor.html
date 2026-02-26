@@ -329,10 +329,10 @@
     }
 
     async function renderCatalog() {
-        _allProducts = await DB.getProducts();
+        _allProducts = await DB.getProducts(false);
         const list = currentTab === 'mios'
-            ? _allProducts.filter(p => String(p.proveedor_id) === String(session.userId))
-            : _allProducts;
+            ? _allProducts.filter(p => String(p.proveedor_id) === String(session.userId) || String(p.proveedorId) === String(session.userId))
+            : _allProducts.filter(p => p.activo);
 
         const grid = document.getElementById('catalogGrid');
         if (list.length === 0) {

@@ -262,6 +262,9 @@
             <div class="nav-item" onclick="showPage('ordenes')">
                 <span class="nav-icon">📦</span> Órdenes
             </div>
+            <div class="nav-item" onclick="showPage('productos')">
+                <span class="nav-icon">🛍️</span> Productos
+            </div>
         </nav>
         <div class="sidebar-bottom">
             <div style="font-size:14px;opacity:.7;margin-bottom:12px;" id="sidebarUser"></div>
@@ -359,6 +362,34 @@
             </div>
         </div>
 
+        <!-- PRODUCTOS -->
+        <div id="page-productos" class="page-panel">
+            <div class="page-title">Productos</div>
+            <div class="page-sub">Gestión del catálogo completo</div>
+            <div class="section-card">
+                <div class="section-header">
+                    <h3>Todos los Productos</h3>
+                </div>
+                <div class="search-filter">
+                    <input type="text" id="searchProducto" placeholder="Buscar por nombre..." oninput="renderProductosAdmin()">
+                    <select id="filterCategoria" onchange="renderProductosAdmin()">
+                        <option value="">Todas las categorías</option>
+                        <option value="mouse">Mouse</option>
+                        <option value="teclado">Teclado</option>
+                        <option value="monitor">Monitor</option>
+                        <option value="audifonos">Audífonos</option>
+                        <option value="otros">Otros</option>
+                    </select>
+                </div>
+                <table>
+                    <thead><tr>
+                        <th>ID</th><th>Icono</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Proveedor</th><th>Estado</th><th>Acciones</th>
+                    </tr></thead>
+                    <tbody id="tablaProductos"></tbody>
+                </table>
+            </div>
+        </div>
+
     </main>
 </div>
 
@@ -391,6 +422,7 @@
         if (name === 'usuarios')    renderCompradores();
         if (name === 'proveedores') renderProveedores();
         if (name === 'ordenes')     renderOrdenes();
+        if (name === 'productos')   renderProductosAdmin();
     }
 
     function fmtDate(iso) {
@@ -466,6 +498,44 @@
                     <button class="btn-sm btn-danger-sm" onclick="deleteUser('${u.id}','proveedor')">🗑️</button>
                 </td>
             </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:#aaa;">Sin proveedores</td></tr>';
+    }
+
+    // ── PRODUCTOS (admin)
+    async function renderProductosAdmin() {
+        const q    = (document.getElementById('searchProducto')?.value || '').toLowerCase();
+        const cat  = document.getElementById('filterCategoria')?.value || '';
+        const all  = await DB.getProducts(false);
+        const list = all.filter(p =>
+            (!q   || p.name.toLowerCase().includes(q)) &&
+            (!cat || p.category === cat)
+        );
+        document.getElementById('tablaProductos').innerHTML = list.map(p => `
+            <tr>
+                <td><code style="font-size:11px;">${p.id}</code></td>
+                <td style="font-size:22px;text-align:center;">${p.icon}</td>
+                <td><strong>${p.name}</strong></td>
+                <td>${p.category}</td>
+                <td>$${Number(p.price).toLocaleString('es-CO')}</td>
+                <td style="font-size:12px;color:#888;">${p.proveedor || '—'}</td>
+                <td>${badge(p.activo ? 'Activo' : 'Inactivo', p.activo ? 'activo' : 'inactivo')}</td>
+                <td>
+                    <button class="btn-sm btn-warning-sm" onclick="toggleProductoActivo(${p.id}, ${p.activo ? 1 : 0})">
+                        ${p.activo ? '🔒 Ocultar' : '🔓 Mostrar'}
+                    </button>
+                    <button class="btn-sm btn-danger-sm" onclick="deleteProductoAdmin(${p.id}, '${p.name.replace(/'/g,"\\'")}')">🗑️ Eliminar</button>
+                </td>
+            </tr>`).join('') || '<tr><td colspan="8" style="text-align:center;color:#aaa;">Sin productos</td></tr>';
+    }
+
+    async function toggleProductoActivo(id, activo) {
+        await DB.updateProduct(id, { activo: activo ? 0 : 1 });
+        renderProductosAdmin();
+    }
+
+    async function deleteProductoAdmin(id, nombre) {
+        if (!confirm(`¿Eliminar el producto "${nombre}"?\nEsta acción no se puede deshacer.`)) return;
+        await DB.deleteProduct(id);
+        renderProductosAdmin();
     }
 
     // ── ÓRDENES

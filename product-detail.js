@@ -15,13 +15,14 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     const productId = parseInt(storedId);
     let product = null;
+    window._currentProduct = null;
 
     try {
         const res  = await fetch(`./api/productos.php?action=get&id=${productId}`);
         const data = await res.json();
         if (data.ok && data.product) {
             const p = data.product;
-            product = {
+            window._currentProduct = product = {
                 id:          parseInt(p.id),
                 name:        p.nombre   || p.name,
                 category:    p.categoria|| p.category,
@@ -72,6 +73,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     loadRelatedProducts(product.category, product.id);
+    checkAdminActions(product);
 });
 
 async function loadRelatedProducts(category, currentId) {
@@ -124,4 +126,50 @@ function addToCompare() {
     list.push(id);
     localStorage.setItem('compareList', JSON.stringify(list));
     alert('✅ Producto agregado a comparación');
+}
+
+// ── Mostrar botón eliminar si es admin o proveedor dueño
+async function checkAdminActions(product) {
+    if (typeof DB === 'undefined') return;
+    const session = DB.getSession();
+    if (!session) return;
+
+    const esAdmin     = session.role === 'admin';
+    const esProveedor = session.role === 'proveedor';
+
+    // Obtener proveedor_id del producto desde la API
+    let proveedorId = null;
+    try {
+        const res  = await fetch(`./api/productos.php?action=get&id=${product.id}`);
+        const data = await res.json();
+        proveedorId = data.product?.proveedor_id || null;
+    } catch(e) {}
+
+    const esDueno = esProveedor && String(proveedorId) === String(session.userId);
+
+    if (esAdmin || esDueno) {
+        const btn = document.getElementById('adminActions');
+        if (btn) btn.style.display = 'block';
+    }
+}
+
+async function deleteCurrentProduct() {
+    const id = parseInt(localStorage.getItem('selectedProduct'));
+    if (!confirm('¿Eliminar este producto? Esta acción no se puede deshacer.')) return;
+    try {
+        const res  = await fetch(`./api/productos.php?action=delete`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ id }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+            alert('✅ Producto eliminado correctamente.');
+            window.location.href = 'index.html';
+        } else {
+            alert('❌ Error: ' + (data.msg || 'No se pudo eliminar.'));
+        }
+    } catch(e) {
+        alert('❌ Error de conexión.');
+    }
 }
