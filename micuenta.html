@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Cuenta - E-PeriTech</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root{--primary:#667eea;--dark:#764ba2;--bg:#f0f2ff;}
+        body{background:var(--bg);}
+        .account-wrapper{max-width:1100px;margin:0 auto;padding:40px 20px;}
+        .account-grid{display:grid;grid-template-columns:280px 1fr;gap:28px;align-items:start;}
+        .account-sidebar{background:white;border-radius:20px;padding:28px;box-shadow:0 4px 16px rgba(0,0,0,.07);position:sticky;top:80px;}
+        .user-avatar{width:80px;height:80px;background:linear-gradient(135deg,var(--primary),var(--dark));
+            border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;
+            margin:0 auto 16px;}
+        .user-name{font-size:18px;font-weight:700;text-align:center;color:#1a1a2e;}
+        .user-email{font-size:13px;color:#888;text-align:center;margin-bottom:20px;}
+        .side-nav{list-style:none;margin:0;padding:0;}
+        .side-nav li{border-radius:10px;margin-bottom:4px;overflow:hidden;}
+        .side-nav button{
+            width:100%;padding:12px 16px;background:transparent;border:none;
+            text-align:left;font-size:14px;font-weight:500;color:#444;
+            cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:10px;
+            transition:background .2s;
+        }
+        .side-nav button:hover{background:#f0f2ff;}
+        .side-nav button.active{background:linear-gradient(135deg,var(--primary),var(--dark));color:white;}
+        .btn-logout{width:100%;margin-top:16px;padding:11px;background:#fee2e2;color:#dc2626;
+            border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;}
+        .account-main{}
+        .panel{display:none;}
+        .panel.active{display:block;}
+        .section-card{background:white;border-radius:18px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:20px;}
+        .section-card h3{font-size:18px;font-weight:700;color:#1a1a2e;margin-bottom:18px;}
+        .form-group{margin-bottom:16px;}
+        .form-group label{display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:5px;}
+        .form-group input{width:100%;padding:11px 14px;border:2px solid #e8e8e8;border-radius:10px;
+            font-size:14px;outline:none;transition:border-color .2s;font-family:inherit;}
+        .form-group input:focus{border-color:var(--primary);}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+        .btn-save{padding:12px 28px;background:linear-gradient(135deg,var(--primary),var(--dark));
+            color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;}
+        .msg{padding:12px 16px;border-radius:10px;font-size:14px;font-weight:500;margin-bottom:16px;display:none;}
+        .msg.success{background:#f0fdf4;color:#10b981;border:1px solid #bbf7d0;display:block;}
+        .msg.error{background:#fef2f2;color:#ef4444;border:1px solid #fecaca;display:block;}
+        table{width:100%;border-collapse:collapse;}
+        thead th{text-align:left;padding:10px 14px;font-size:12px;font-weight:700;
+            text-transform:uppercase;letter-spacing:.8px;color:#888;background:#f8f9ff;}
+        tbody tr{border-bottom:1px solid #f0f0f0;}
+        tbody td{padding:12px 14px;font-size:14px;color:#444;}
+        .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+        .badge-pendiente{background:#fef3c7;color:#92400e;}
+        .badge-entregado{background:#d1fae5;color:#065f46;}
+        .badge-cancelado{background:#fee2e2;color:#991b1b;}
+        .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;}
+        .mini-stat{background:#f8f9ff;border-radius:14px;padding:18px;text-align:center;}
+        .mini-stat-val{font-size:26px;font-weight:700;color:var(--primary);}
+        .mini-stat-lbl{font-size:12px;color:#888;margin-top:4px;}
+        .empty-state{text-align:center;padding:48px 20px;color:#aaa;}
+        .empty-state .empty-icon{font-size:56px;margin-bottom:14px;}
+        .empty-state h4{font-size:18px;margin-bottom:6px;color:#666;}
+        @media(max-width:800px){
+            .account-grid{grid-template-columns:1fr;}
+            .account-sidebar{position:static;}
+            .form-row{grid-template-columns:1fr;}
+            .stat-row{grid-template-columns:1fr 1fr;}
+        }
+    </style>
+</head>
+<body>
+<div class="header-top">Expertos en hardware, aliados de tu bolsillo.💸</div>
+
+<header>
+    <nav>
+        <div class="logo">🖥️ E-PeriTech</div>
+        <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="producto.html">Productos</a></li>
+            <li><a href="ofertas.html">Ofertas</a></li>
+            <li><a href="marcas.html">Marcas</a></li>
+            <li><a href="contacto.html">¿Dudas?</a></li>
+        </ul>
+        <div class="nav-icons">
+            <button class="icon-btn" onclick="toggleSearch()">🔍</button>
+            <button class="icon-btn compare-btn" onclick="window.location.href='comparar.html'">⚖️</button>
+        </div>
+    </nav>
+</header>
+
+<div class="account-wrapper">
+    <div class="account-grid">
+
+        <!-- SIDEBAR -->
+        <aside class="account-sidebar">
+            <div class="user-avatar" id="userAvatar">👤</div>
+            <div class="user-name" id="userName">Cargando...</div>
+            <div class="user-email" id="userEmail"></div>
+            <ul class="side-nav">
+                <li><button class="active" onclick="switchPanel('overview',this)">📊 Resumen</button></li>
+                <li><button onclick="switchPanel('ordenes',this)">📦 Mis Órdenes</button></li>
+                <li><button onclick="switchPanel('perfil',this)">✏️ Editar Perfil</button></li>
+                <li><button onclick="switchPanel('seguridad',this)">🔒 Seguridad</button></li>
+            </ul>
+            <button class="btn-logout" onclick="doLogout()">🚪 Cerrar sesión</button>
+        </aside>
+
+        <!-- MAIN PANELS -->
+        <div class="account-main">
+
+            <!-- OVERVIEW -->
+            <div id="panel-overview" class="panel active">
+                <div class="section-card">
+                    <h3>Bienvenido de vuelta 👋</h3>
+                    <div class="stat-row" id="overviewStats"></div>
+                    <p style="color:#888;font-size:14px;">Miembro desde <span id="memberSince"></span></p>
+                </div>
+                <div class="section-card">
+                    <h3>Últimas órdenes</h3>
+                    <table>
+                        <thead><tr><th>ID</th><th>Producto(s)</th><th>Total</th><th>Estado</th><th>Fecha</th></tr></thead>
+                        <tbody id="recentOrders"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ÓRDENES -->
+            <div id="panel-ordenes" class="panel">
+                <div class="section-card">
+                    <h3>Mis Órdenes</h3>
+                    <table>
+                        <thead><tr><th>ID</th><th>Productos</th><th>Total</th><th>Estado</th><th>Fecha</th></tr></thead>
+                        <tbody id="allOrders"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PERFIL -->
+            <div id="panel-perfil" class="panel">
+                <div class="section-card" style="max-width:540px;">
+                    <h3>Editar Perfil</h3>
+                    <div id="perfilMsg" class="msg"></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Nombre</label><input id="pNombre" type="text"></div>
+                        <div class="form-group"><label>Apellido</label><input id="pApellido" type="text"></div>
+                    </div>
+                    <div class="form-group"><label>Teléfono</label><input id="pTelefono" type="tel"></div>
+                    <div class="form-group"><label>Dirección</label><input id="pDireccion" type="text"></div>
+                    <button class="btn-save" onclick="savePerfil()">💾 Guardar cambios</button>
+                </div>
+            </div>
+
+            <!-- SEGURIDAD -->
+            <div id="panel-seguridad" class="panel">
+                <div class="section-card" style="max-width:540px;">
+                    <h3>Cambiar Contraseña</h3>
+                    <div id="passMsg" class="msg"></div>
+                    <div class="form-group"><label>Contraseña actual</label><input id="passActual" type="password"></div>
+                    <div class="form-group"><label>Nueva contraseña</label><input id="passNueva" type="password"></div>
+                    <div class="form-group"><label>Confirmar nueva contraseña</label><input id="passConfirm" type="password"></div>
+                    <button class="btn-save" onclick="changePassword()">🔐 Actualizar contraseña</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>🖥️ E-PeriTech</h3>
+            <p>Tu plataforma de confianza para asesoramiento en periféricos y tecnología.</p>
+        </div>
+        <div class="footer-section">
+            <h3>Información</h3>
+            <ul><li><a href="nosotros.html">Sobre Nosotros</a></li><li><a href="terminos.html">Términos</a></li></ul>
+        </div>
+        <div class="footer-section">
+            <h3>Contacto</h3>
+            <ul><li>📞 +57 3185838072</li><li>📍 Cúcuta, Colombia</li></ul>
+        </div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2025 E-PeriTech.</p></div>
+</footer>
+
+<script src="database.js"></script>
+<script>
+    DB.requireAuth('login.html');
+    const session = DB.getSession();
+    if(session.role !== 'comprador' && session.role !== 'admin') {
+        // proveedores van a su panel
+        if(session.role === 'proveedor') window.location.href = 'proveedor.html';
+    }
+    let user = DB.getUserById(session.userId);
+
+    function loadHeader() {
+        document.getElementById('userAvatar').textContent  = user.avatar || '👤';
+        document.getElementById('userName').textContent    = user.nombre + ' ' + user.apellido;
+        document.getElementById('userEmail').textContent   = user.email;
+        document.getElementById('memberSince').textContent = new Date(user.createdAt).toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+    }
+
+    function switchPanel(name, btn) {
+        document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+        document.querySelectorAll('.side-nav button').forEach(b=>b.classList.remove('active'));
+        document.getElementById('panel-'+name).classList.add('active');
+        btn.classList.add('active');
+        if(name==='overview')  renderOverview();
+        if(name==='ordenes')   renderAllOrders();
+        if(name==='perfil')    loadPerfilForm();
+    }
+
+    function fmtDate(iso){ return new Date(iso).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}); }
+    function fmtMoney(n){ return '$'+Number(n).toLocaleString('es-CO'); }
+    function badge(text,cls){ return `<span class="badge badge-${cls}">${text}</span>`; }
+
+    function renderOverview() {
+        const orders = DB.getOrdersByUser(session.userId);
+        const total  = orders.reduce((s,o)=>s+o.total,0);
+        document.getElementById('overviewStats').innerHTML = `
+            <div class="mini-stat"><div class="mini-stat-val">${orders.length}</div><div class="mini-stat-lbl">Órdenes</div></div>
+            <div class="mini-stat"><div class="mini-stat-val">${orders.filter(o=>o.estado==='pendiente').length}</div><div class="mini-stat-lbl">Pendientes</div></div>
+            <div class="mini-stat"><div class="mini-stat-val" style="font-size:18px;">${fmtMoney(total)}</div><div class="mini-stat-lbl">Total gastado</div></div>
+        `;
+        const last3 = orders.slice(-3).reverse();
+        document.getElementById('recentOrders').innerHTML = last3.length
+            ? last3.map(o=>`<tr>
+                <td><code style="font-size:11px;">${o.id}</code></td>
+                <td>${o.productos.map(p=>p.nombre).join(', ')}</td>
+                <td>${fmtMoney(o.total)}</td>
+                <td>${badge(o.estado,o.estado)}</td>
+                <td>${fmtDate(o.fecha)}</td></tr>`).join('')
+            : '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📭</div><h4>Sin órdenes aún</h4><p>Explora los productos de la tienda</p></div></td></tr>';
+    }
+
+    function renderAllOrders() {
+        const orders = DB.getOrdersByUser(session.userId).slice().reverse();
+        document.getElementById('allOrders').innerHTML = orders.length
+            ? orders.map(o=>`<tr>
+                <td><code style="font-size:11px;">${o.id}</code></td>
+                <td>${o.productos.map(p=>p.nombre).join(', ')}</td>
+                <td>${fmtMoney(o.total)}</td>
+                <td>${badge(o.estado,o.estado)}</td>
+                <td>${fmtDate(o.fecha)}</td></tr>`).join('')
+            : '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📭</div><h4>Sin órdenes</h4></div></td></tr>';
+    }
+
+    function loadPerfilForm() {
+        const u = DB.getUserById(session.userId);
+        document.getElementById('pNombre').value    = u.nombre    || '';
+        document.getElementById('pApellido').value  = u.apellido  || '';
+        document.getElementById('pTelefono').value  = u.telefono  || '';
+        document.getElementById('pDireccion').value = u.direccion || '';
+    }
+
+    function savePerfil() {
+        const changes = {
+            nombre:    document.getElementById('pNombre').value.trim(),
+            apellido:  document.getElementById('pApellido').value.trim(),
+            telefono:  document.getElementById('pTelefono').value.trim(),
+            direccion: document.getElementById('pDireccion').value.trim(),
+        };
+        const res = DB.updateUser(session.userId, changes);
+        const msg = document.getElementById('perfilMsg');
+        if(res.ok){ msg.textContent='✅ Perfil actualizado.'; msg.className='msg success'; user=res.user; loadHeader(); }
+        else       { msg.textContent=res.msg; msg.className='msg error'; }
+        setTimeout(()=>{ msg.className='msg'; },3000);
+    }
+
+    function changePassword() {
+        const actual   = document.getElementById('passActual').value;
+        const nueva    = document.getElementById('passNueva').value;
+        const confirm  = document.getElementById('passConfirm').value;
+        const msg      = document.getElementById('passMsg');
+        if(!actual || !nueva) return showPassMsg('Completa todos los campos.','error');
+        if(nueva.length < 8)  return showPassMsg('Mínimo 8 caracteres.','error');
+        if(nueva !== confirm)  return showPassMsg('Las contraseñas no coinciden.','error');
+        // verify current
+        const u = DB.getUserById(session.userId);
+        if(u.password !== DB._hash(actual)) return showPassMsg('Contraseña actual incorrecta.','error');
+        DB.updateUser(session.userId,{password: nueva});
+        showPassMsg('✅ Contraseña actualizada.','success');
+        document.getElementById('passActual').value = '';
+        document.getElementById('passNueva').value  = '';
+        document.getElementById('passConfirm').value= '';
+    }
+
+    function showPassMsg(text,type){
+        const msg = document.getElementById('passMsg');
+        msg.textContent = text; msg.className = 'msg '+type;
+        setTimeout(()=>{ msg.className='msg'; },3000);
+    }
+
+    function doLogout(){ DB.logout(); window.location.href='index.html'; }
+    function toggleMenu(){ document.getElementById('navLinks').classList.toggle('active'); }
+    function toggleSearch(){ window.location.href='index.html'; }
+
+    loadHeader();
+    renderOverview();
+</script>
+</body>
+</html>

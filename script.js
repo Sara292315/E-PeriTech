@@ -255,3 +255,40 @@ function clearSearch() {
 document.addEventListener('DOMContentLoaded', function() {
     renderProducts();
 });
+// ─── AUTH INTEGRATION ───────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    renderNavAuth();
+    updateCompareBadge();
+});
+
+function renderNavAuth() {
+    if (typeof DB === 'undefined') return;
+    const session = DB.getSession();
+    const navIcons = document.querySelector('.nav-icons');
+    if (!navIcons) return;
+
+    // Remove old user btn if present
+    const old = document.getElementById('navUserBtn');
+    if (old) old.remove();
+
+    const btn = document.createElement('button');
+    btn.id = 'navUserBtn';
+    btn.className = 'icon-btn';
+    btn.style.cssText = 'position:relative;';
+
+    if (session) {
+        btn.innerHTML = `<span style="font-size:20px;">${session.avatar || '👤'}</span>`;
+        btn.title = session.nombre;
+        btn.onclick = () => {
+            if (session.role === 'admin')          window.location.href = 'admin.html';
+            else if (session.role === 'proveedor') window.location.href = 'proveedor.html';
+            else                                   window.location.href = 'micuenta.html';
+        };
+    } else {
+        btn.innerHTML = '👤';
+        btn.title = 'Iniciar sesión';
+        btn.onclick = () => window.location.href = 'login.html';
+    }
+
+    navIcons.appendChild(btn);
+}

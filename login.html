@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - E-PeriTech</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #764ba2;
+            --error: #ef4444;
+            --success: #10b981;
+        }
+
+        body { background: #f0f2ff; min-height: 100vh; display: flex; flex-direction: column; }
+
+        .auth-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(102,126,234,0.15);
+            width: 100%;
+            max-width: 440px;
+            overflow: hidden;
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 36px 40px 28px;
+            text-align: center;
+            color: white;
+        }
+
+        .auth-logo {
+            font-size: 38px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        .auth-subtitle { font-size: 15px; opacity: .85; }
+
+        .auth-body { padding: 36px 40px; }
+
+        .auth-tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 28px;
+            gap: 4px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: #888;
+            transition: all .25s;
+        }
+
+        .auth-tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .form-group { margin-bottom: 18px; }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color .2s;
+            font-family: inherit;
+            background: #fafafa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus { border-color: var(--primary); background: white; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .btn-auth {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .btn-auth:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102,126,234,.35); }
+        .btn-auth:active { transform: translateY(0); }
+
+        .msg-box {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .msg-box.error   { background: #fef2f2; color: var(--error);   border: 1px solid #fecaca; display: block; }
+        .msg-box.success { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; display: block; }
+
+        .form-panel { display: none; }
+        .form-panel.active { display: block; }
+
+        .demo-accounts {
+            margin-top: 24px;
+            padding: 16px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            border: 1px dashed #c7d2fe;
+        }
+
+        .demo-accounts p {
+            font-size: 12px;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            margin-bottom: 10px;
+        }
+
+        .demo-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            border: 1px solid #e8e8e8;
+            transition: border-color .2s;
+            font-size: 13px;
+        }
+
+        .demo-item:hover { border-color: var(--primary); }
+
+        .demo-item:last-child { margin-bottom: 0; }
+
+        .demo-role {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .role-admin    { background: #fef3c7; color: #92400e; }
+        .role-proveedor{ background: #ede9fe; color: #5b21b6; }
+        .role-comprador{ background: #d1fae5; color: #065f46; }
+
+        .field-hint { font-size: 12px; color: #aaa; margin-top: 4px; }
+
+        @media(max-width:480px){
+            .auth-body { padding: 24px 20px; }
+            .auth-header { padding: 28px 20px 20px; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-top">Expertos en hardware, aliados de tu bolsillo.💸</div>
+
+    <header>
+        <nav>
+            <div class="logo">🖥️ E-PeriTech</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="producto.html">Productos</a></li>
+                <li><a href="ofertas.html">Ofertas</a></li>
+                <li><a href="marcas.html">Marcas</a></li>
+                <li><a href="contacto.html">¿Dudas?</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">🖥️ E-PeriTech</div>
+                <div class="auth-subtitle">Accede a tu cuenta o regístrate gratis</div>
+            </div>
+
+            <div class="auth-body">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchTab('login')">Iniciar Sesión</button>
+                    <button class="auth-tab" onclick="switchTab('register')">Registrarse</button>
+                </div>
+
+                <div id="msgBox" class="msg-box"></div>
+
+                <!-- ── LOGIN ── -->
+                <div id="loginPanel" class="form-panel active">
+                    <div class="form-group">
+                        <label>Correo electrónico</label>
+                        <input type="email" id="loginEmail" placeholder="tu@correo.com" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+                    </div>
+                    <button class="btn-auth" onclick="doLogin()">Ingresar →</button>
+
+                    <div class="demo-accounts">
+                        <p>🔑 Cuentas de prueba (clic para llenar)</p>
+                        <div class="demo-item" onclick="fillDemo('admin@eperitech.com','Admin2025!')">
+                            <span>👨‍💼 admin@eperitech.com</span>
+                            <span class="demo-role role-admin">Admin</span>
+                        </div>
+                        <div class="demo-item" onclick="fillDemo('proveedor@techgear.com','Prov2025!')">
+                            <span>🏭 proveedor@techgear.com</span>
+                            <span class="demo-role role-proveedor">Proveedor</span>
+                        </div>
+                        <div class="demo-item" onclick="fillDemo('andres@gmail.com','User2025!')">
+                            <span>👤 andres@gmail.com</span>
+                            <span class="demo-role role-comprador">Comprador</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── REGISTER ── -->
+                <div id="registerPanel" class="form-panel">
+                    <div class="form-group">
+                        <label>Tipo de cuenta</label>
+                        <select id="regRole" onchange="toggleProveedorFields()">
+                            <option value="comprador">👤 Comprador</option>
+                            <option value="proveedor">🏭 Proveedor / Empresa</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="regNombre" placeholder="Juan">
+                        </div>
+                        <div class="form-group">
+                            <label>Apellido</label>
+                            <input type="text" id="regApellido" placeholder="García">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Correo electrónico</label>
+                        <input type="email" id="regEmail" placeholder="tu@correo.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="tel" id="regTelefono" placeholder="+57 300 000 0000">
+                    </div>
+
+                    <!-- Campos proveedor -->
+                    <div id="proveedorFields" style="display:none">
+                        <div class="form-group">
+                            <label>Nombre de la empresa</label>
+                            <input type="text" id="regEmpresa" placeholder="Mi Empresa S.A.S">
+                        </div>
+                        <div class="form-group">
+                            <label>NIT</label>
+                            <input type="text" id="regNit" placeholder="900.000.000-0">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="regPass" placeholder="Mínimo 8 caracteres">
+                        <div class="field-hint">Usa letras, números y símbolos para mayor seguridad.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Confirmar contraseña</label>
+                        <input type="password" id="regPass2" placeholder="Repite tu contraseña">
+                    </div>
+
+                    <button class="btn-auth" onclick="doRegister()">Crear cuenta →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-bottom" style="border:none; padding:20px;">
+            <p>&copy; 2025 E-PeriTech. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="database.js"></script>
+    <script>
+        // Redirigir si ya está logueado
+        const existing = DB.getSession();
+        if (existing) redirectByRole(existing.role);
+
+        function redirectByRole(role) {
+            if (role === 'admin')     window.location.href = 'admin.html';
+            else if (role === 'proveedor') window.location.href = 'proveedor.html';
+            else                          window.location.href = 'index.html';
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach((t,i)=>
+                t.classList.toggle('active', (tab==='login'?i===0:i===1))
+            );
+            document.getElementById('loginPanel').classList.toggle('active', tab==='login');
+            document.getElementById('registerPanel').classList.toggle('active', tab==='register');
+            clearMsg();
+        }
+
+        function showMsg(text, type) {
+            const b = document.getElementById('msgBox');
+            b.textContent = text;
+            b.className = 'msg-box ' + type;
+        }
+
+        function clearMsg() {
+            const b = document.getElementById('msgBox');
+            b.className = 'msg-box';
+            b.textContent = '';
+        }
+
+        function fillDemo(email, pass) {
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPass').value  = pass;
+            clearMsg();
+        }
+
+        function toggleProveedorFields() {
+            const role = document.getElementById('regRole').value;
+            document.getElementById('proveedorFields').style.display =
+                role === 'proveedor' ? 'block' : 'none';
+        }
+
+        function doLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass  = document.getElementById('loginPass').value;
+            if (!email || !pass) { showMsg('Por favor completa todos los campos.', 'error'); return; }
+            const res = DB.login(email, pass);
+            if (!res.ok) { showMsg(res.msg, 'error'); return; }
+            showMsg('✅ Bienvenido, ' + res.user.nombre + '! Redirigiendo...', 'success');
+            setTimeout(() => redirectByRole(res.user.role), 900);
+        }
+
+        function doRegister() {
+            const nombre   = document.getElementById('regNombre').value.trim();
+            const apellido = document.getElementById('regApellido').value.trim();
+            const email    = document.getElementById('regEmail').value.trim();
+            const telefono = document.getElementById('regTelefono').value.trim();
+            const pass     = document.getElementById('regPass').value;
+            const pass2    = document.getElementById('regPass2').value;
+            const role     = document.getElementById('regRole').value;
+            const empresa  = document.getElementById('regEmpresa')?.value.trim();
+            const nit      = document.getElementById('regNit')?.value.trim();
+
+            if (!nombre || !apellido || !email || !pass)
+                return showMsg('Por favor completa los campos obligatorios.', 'error');
+            if (pass.length < 8)
+                return showMsg('La contraseña debe tener al menos 8 caracteres.', 'error');
+            if (pass !== pass2)
+                return showMsg('Las contraseñas no coinciden.', 'error');
+            if (role === 'proveedor' && !empresa)
+                return showMsg('Ingresa el nombre de tu empresa.', 'error');
+
+            const res = DB.createUser({ nombre, apellido, email, password: pass, telefono, role, empresa, nit });
+            if (!res.ok) return showMsg(res.msg, 'error');
+
+            showMsg('✅ Cuenta creada correctamente. Iniciando sesión...', 'success');
+            const loginRes = DB.login(email, pass);
+            setTimeout(() => redirectByRole(loginRes.user.role), 1000);
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                if (document.getElementById('loginPanel').classList.contains('active')) doLogin();
+                else doRegister();
+            }
+        });
+    </script>
+</body>
+</html>
