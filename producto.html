@@ -341,10 +341,11 @@
                 </div>
 
                 <div class="product-actions">
-                    <button class="btn-contact" onclick="contactSeller()">
-                        📞 Contacto para comprar
-                        <br>
-                         (página oficial)
+                    <button class="btn-add-to-cart-main" onclick="addCurrentToCart()">
+                        🛒 Agregar al carrito
+                    </button>
+                    <button class="btn-compare" onclick="contactSeller()">
+                        📞 Contacto
                     </button>
                 </div>
 
@@ -425,5 +426,17 @@
 
     <script src="script.js"></script>
     <script src="product-detail.js"></script>
+    <script src="cart.js"></script>
+    <script>
+    // Agregar producto actual al carrito
+    function addCurrentToCart() {
+        const id   = parseInt(localStorage.getItem('selectedProduct'));
+        if (!id) return;
+        // products está definido en script.js
+        const product = (typeof products !== 'undefined') ? products.find(p => p.id === id) : null;
+        if (!product) { Cart.showToast('❌ Producto no encontrado'); return; }
+        Cart.addItem(product);
+    }
+    </script>
 </body>
 </html>

@@ -1,78 +1,12 @@
-// Sample products data
-const products = [
-    {
-        id: 1,
-        name: "Mouse Gamer Inalámbrico RGB Pro",
-        category: "mouse",
-        price: 319000,
-        oldPrice: 399000,
-        discount: 20,
-        icon: "🖱️"
-    },
-    {
-        id: 2,
-        name: "Teclado Mecánico RGB Gaming",
-        category: "teclado",
-        price: 225000,
-        oldPrice: null,
-        discount: 0,
-        icon: "⌨️"
-    },
-    {
-        id: 3,
-        name: "Monitor Gamer 25'' 200Hz IPS",
-        category: "monitor",
-        price: 589000,
-        oldPrice: 635000,
-        discount: 7,
-        icon: "🖥️"
-    },
-    {
-        id: 4,
-        name: "Audífonos Gaming 7.1 Surround",
-        category: "audifonos",
-        price: 185000,
-        oldPrice: 220000,
-        discount: 16,
-        icon: "🎧"
-    },
-    {
-        id: 5,
-        name: "Mouse Pad XXL RGB Extended",
-        category: "mouse",
-        price: 89000,
-        oldPrice: null,
-        discount: 0,
-        icon: "🎨"
-    },
-    {
-        id: 6,
-        name: "Webcam 4K Pro Streaming",
-        category: "otros",
-        price: 349000,
-        oldPrice: 420000,
-        discount: 17,
-        icon: "📹"
-    },
-    {
-        id: 7,
-        name: "SSD M.2 NVMe 1TB Ultra Fast",
-        category: "otros",
-        price: 259000,
-        oldPrice: null,
-        discount: 0,
-        icon: "💾"
-    },
-    {
-        id: 8,
-        name: "Silla Gamer Ergonómica Pro",
-        category: "otros",
-        price: 899000,
-        oldPrice: 1100000,
-        discount: 18,
-        icon: "🪑"
+// Productos: se leen desde database.js (localStorage) para reflejar cambios de proveedores
+// Si DB no está disponible se usa el array de respaldo
+let products = [];
+
+function loadProducts() {
+    if (typeof DB !== 'undefined') {
+        products = DB.getProducts().filter(p => p.activo !== false);
     }
-];
+}
 
 // Format price to COP
 function formatPrice(price) {
@@ -103,7 +37,10 @@ function renderProducts(filteredProducts = products) {
                 ${product.discount > 0 ? `<span class="discount-badge">-${product.discount}% OFF</span>` : ''}
                 <div class="product-actions">
                     <button class="btn-add-cart" onclick="viewProduct(${product.id})">
-                        Ver Detalles 🛒
+                        Ver Detalles
+                    </button>
+                    <button class="btn-compare-quick" onclick="addToCartFromGrid(${product.id})" title="Agregar al carrito">
+                        🛒
                     </button>
                     <button class="btn-compare-quick" onclick="addToCompare(${product.id})" title="Agregar a comparación">
                         ⚖️
@@ -135,10 +72,13 @@ function filterCategory(category) {
     document.getElementById('productos').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Add to cart (opcional)
-function addToCart(productId) {
+// Add to cart desde la grilla
+function addToCartFromGrid(productId) {
     const product = products.find(p => p.id === productId);
-    alert(`✅ ${product.name} agregado al carrito`);
+    if (!product) return;
+    if (typeof Cart !== 'undefined') {
+        Cart.addItem(product);
+    }
 }
 
 // Agregar a comparación
@@ -253,6 +193,7 @@ function clearSearch() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    loadProducts();
     renderProducts();
 });
 // ─── AUTH INTEGRATION ───────────────────────────────────────────────────────

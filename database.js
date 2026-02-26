@@ -254,6 +254,74 @@ const DB = {
         return { ok: true };
     },
 
+    // ─── PRODUCTOS ─────────────────────────────────────────────────────
+    getProducts()          { return JSON.parse(localStorage.getItem(this.KEYS.PRODUCTS) || 'null') || this._defaultProducts(); },
+    saveProducts(p)        { localStorage.setItem(this.KEYS.PRODUCTS, JSON.stringify(p)); },
+
+    _defaultProducts() {
+        // Productos por defecto (los mismos del array estático de script.js)
+        return [
+            { id:1, name:'Mouse Gamer Inalámbrico RGB Pro',   category:'mouse',    price:319000, oldPrice:399000, discount:20, icon:'🖱️', proveedorId:null, activo:true },
+            { id:2, name:'Teclado Mecánico RGB Gaming',        category:'teclado',  price:225000, oldPrice:null,   discount:0,  icon:'⌨️', proveedorId:null, activo:true },
+            { id:3, name:"Monitor Gamer 25'' 200Hz IPS",       category:'monitor',  price:589000, oldPrice:635000, discount:7,  icon:'🖥️', proveedorId:null, activo:true },
+            { id:4, name:'Audífonos Gaming 7.1 Surround',      category:'audifonos',price:185000, oldPrice:220000, discount:16, icon:'🎧', proveedorId:null, activo:true },
+            { id:5, name:'Mouse Pad XXL RGB Extended',         category:'mouse',    price:89000,  oldPrice:null,   discount:0,  icon:'🎨', proveedorId:null, activo:true },
+            { id:6, name:'Webcam 4K Pro Streaming',            category:'otros',    price:349000, oldPrice:420000, discount:17, icon:'📹', proveedorId:null, activo:true },
+            { id:7, name:'SSD M.2 NVMe 1TB Ultra Fast',        category:'otros',    price:259000, oldPrice:null,   discount:0,  icon:'💾', proveedorId:null, activo:true },
+            { id:8, name:'Silla Gamer Ergonómica Pro',         category:'otros',    price:899000, oldPrice:1100000,discount:18, icon:'🪑', proveedorId:null, activo:true },
+        ];
+    },
+
+    createProduct(data, proveedorId) {
+        const products = this.getProducts();
+        const newId = Math.max(0, ...products.map(p => p.id)) + 1;
+        const product = {
+            id:          newId,
+            name:        data.name.trim(),
+            category:    data.category,
+            price:       Number(data.price),
+            oldPrice:    data.oldPrice ? Number(data.oldPrice) : null,
+            discount:    data.oldPrice ? Math.round((1 - data.price / data.oldPrice) * 100) : 0,
+            icon:        data.icon || '📦',
+            description: data.description || '',
+            proveedorId: proveedorId,
+            activo:      true,
+            createdAt:   new Date().toISOString(),
+        };
+        products.push(product);
+        this.saveProducts(products);
+        return { ok: true, product };
+    },
+
+    updateProduct(id, data) {
+        const products = this.getProducts();
+        const idx = products.findIndex(p => p.id === id);
+        if (idx === -1) return { ok: false, msg: 'Producto no encontrado.' };
+        const updated = {
+            ...products[idx],
+            name:        data.name.trim(),
+            category:    data.category,
+            price:       Number(data.price),
+            oldPrice:    data.oldPrice ? Number(data.oldPrice) : null,
+            discount:    data.oldPrice ? Math.round((1 - data.price / data.oldPrice) * 100) : 0,
+            icon:        data.icon || products[idx].icon,
+            description: data.description ?? products[idx].description,
+        };
+        products[idx] = updated;
+        this.saveProducts(products);
+        return { ok: true, product: updated };
+    },
+
+    deleteProduct(id) {
+        const products = this.getProducts().filter(p => p.id !== id);
+        this.saveProducts(products);
+        return { ok: true };
+    },
+
+    getProductsByProveedor(proveedorId) {
+        return this.getProducts().filter(p => p.proveedorId === proveedorId);
+    },
+
     // ─── STATS (admin) ─────────────────────────────────────────────────
     getStats() {
         const users   = this.getUsers();

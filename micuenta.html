@@ -99,7 +99,7 @@
             <div class="user-email" id="userEmail"></div>
             <ul class="side-nav">
                 <li><button class="active" onclick="switchPanel('overview',this)">📊 Resumen</button></li>
-                <li><button onclick="switchPanel('ordenes',this)">📦 Mis Órdenes</button></li>
+                <li><button onclick="switchPanel('ordenes',this)">🛒 Mis Compras</button></li>
                 <li><button onclick="switchPanel('perfil',this)">✏️ Editar Perfil</button></li>
                 <li><button onclick="switchPanel('seguridad',this)">🔒 Seguridad</button></li>
             </ul>
@@ -128,7 +128,7 @@
             <!-- ÓRDENES -->
             <div id="panel-ordenes" class="panel">
                 <div class="section-card">
-                    <h3>Mis Órdenes</h3>
+                    <h3>🛒 Mis Compras</h3>
                     <table>
                         <thead><tr><th>ID</th><th>Productos</th><th>Total</th><th>Estado</th><th>Fecha</th></tr></thead>
                         <tbody id="allOrders"></tbody>
@@ -237,11 +237,13 @@
 
     function renderAllOrders() {
         const orders = DB.getOrdersByUser(session.userId).slice().reverse();
-        document.getElementById('allOrders').innerHTML = orders.length
+        const el = document.getElementById('allOrders');
+        if (!el) return;
+        el.innerHTML = orders.length
             ? orders.map(o=>`<tr>
                 <td><code style="font-size:11px;">${o.id}</code></td>
-                <td>${o.productos.map(p=>p.nombre).join(', ')}</td>
-                <td>${fmtMoney(o.total)}</td>
+                <td>${o.productos.map(p=>`<div style="font-size:13px;"><strong>${p.nombre}</strong> ×${p.cantidad||1} <span style="color:#888;font-size:11px;">${fmtMoney(p.precio)}</span></div>`).join('')}</td>
+                <td><strong>${fmtMoney(o.total)}</strong></td>
                 <td>${badge(o.estado,o.estado)}</td>
                 <td>${fmtDate(o.fecha)}</td></tr>`).join('')
             : '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📭</div><h4>Sin órdenes</h4></div></td></tr>';
@@ -300,5 +302,6 @@
     loadHeader();
     renderOverview();
 </script>
+    <script src="cart.js"></script>
 </body>
 </html>
