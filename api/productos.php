@@ -1,144 +1,117 @@
 <?php
-// api/productos.php — CRUD de productos
-require_once __DIR__ . '/config.php';
-session_start();
+// ============================================================
+//  E-PeriTech — API Productos
+//  Endpoints:
+//    GET    /api/productos.php?action=listar
+//    GET    /api/productos.php?action=obtener&id=1
+//    POST   /api/productos.php?action=crear
+//    PUT    /api/productos.php?action=actualizar&id=1
+//    DELETE /api/productos.php?action=eliminar&id=1
+// ============================================================
 
-$method = $_SERVER['REQUEST_METHOD'];
+require_once 'config.php';
+
 $action = $_GET['action'] ?? '';
 
-switch ($action) {
+try {
+    $pdo = getDB();
 
-    // ─── LISTAR ───────────────────────────────────────────────
-    case 'list':
-        $pdo        = getDB();
-        $soloActivos = $_GET['activos'] ?? '1';
-        $categoria   = $_GET['categoria'] ?? null;
-        $proveedorId = $_GET['proveedor_id'] ?? null;
+    switch ($action) {
 
-        $sql    = "SELECT * FROM v_productos WHERE 1=1";
-        $params = [];
-
-        if ($soloActivos === '1') { $sql .= " AND activo = 1"; }
-        if ($categoria)           { $sql .= " AND categoria = ?"; $params[] = $categoria; }
-        if ($proveedorId)         { $sql .= " AND proveedor = (SELECT empresa FROM proveedores WHERE usuario_id = ?)"; }
-
-        // Búsqueda por nombre
-        if (!empty($_GET['q'])) {
-            $sql .= " AND nombre LIKE ?";
-            $params[] = '%' . $_GET['q'] . '%';
-        }
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        respond(['ok' => true, 'data' => $stmt->fetchAll()]);
-        break;
-
-    // ─── OBTENER POR ID ───────────────────────────────────────
-    case 'get':
-        $id   = (int)($_GET['id'] ?? 0);
-        $stmt = getDB()->prepare("SELECT * FROM v_productos WHERE id = ?");
-        $stmt->execute([$id]);
-        $prod = $stmt->fetch();
-        if (!$prod) respond(['ok' => false, 'msg' => 'Producto no encontrado.'], 404);
-        respond(['ok' => true, 'product' => $prod]);
-        break;
-
-    // ─── CREAR ────────────────────────────────────────────────
-    case 'create':
-        if ($method !== 'POST') respond(['ok' => false, 'msg' => 'Método no permitido'], 405);
-
-        $body       = getBody();
-        $nombre     = trim($body['name'] ?? $body['nombre'] ?? '');
-        $categoria  = trim($body['category'] ?? $body['categoria'] ?? '');
-        $precio     = (float)($body['price'] ?? $body['precio'] ?? 0);
-        $precioViejo = $body['oldPrice'] ?? $body['precio_viejo'] ?? null;
-        $icono      = $body['icon'] ?? $body['icono'] ?? '📦';
-        $descripcion = $body['description'] ?? $body['descripcion'] ?? '';
-        $proveedorId = $body['proveedorId'] ?? $body['proveedor_id'] ?? null;
-
-        if (!$nombre || !$categoria || $precio <= 0)
-            respond(['ok' => false, 'msg' => 'Nombre, categoría y precio son obligatorios.']);
-
-        $pdo = getDB();
-
-        // Obtener categoria_id
-        $catStmt = $pdo->prepare("SELECT id FROM categorias WHERE slug = ?");
-        $catStmt->execute([$categoria]);
-        $cat = $catStmt->fetch();
-        if (!$cat) respond(['ok' => false, 'msg' => "Categoría '$categoria' no existe."]);
-
-        $descuento = 0;
-        if ($precioViejo && $precioViejo > $precio) {
-            $descuento = (int)round((1 - $precio / $precioViejo) * 100);
-        }
-
-        $pdo->prepare("
-            INSERT INTO productos (nombre, categoria_id, precio, precio_viejo, descuento, icono, descripcion, proveedor_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ")->execute([$nombre, $cat['id'], $precio, $precioViejo ?: null, $descuento, $icono, $descripcion, $proveedorId]);
-
-        $newId = $pdo->lastInsertId();
-        respond(['ok' => true, 'id' => $newId, 'msg' => 'Producto creado.']);
-        break;
-
-    // ─── ACTUALIZAR ───────────────────────────────────────────
-    case 'update':
-        if ($method !== 'POST' && $method !== 'PUT')
-            respond(['ok' => false, 'msg' => 'Método no permitido'], 405);
-
-        $body  = getBody();
-        $id    = (int)($body['id'] ?? 0);
-        if (!$id) respond(['ok' => false, 'msg' => 'ID requerido.']);
-
-        $pdo    = getDB();
-        $fields = [];
-        $params = [];
-
-        if (isset($body['name']) || isset($body['nombre'])) {
-            $fields[] = "nombre = ?";
-            $params[] = trim($body['name'] ?? $body['nombre']);
-        }
-        if (isset($body['category']) || isset($body['categoria'])) {
-            $slug    = $body['category'] ?? $body['categoria'];
-            $catStmt = $pdo->prepare("SELECT id FROM categorias WHERE slug = ?");
-            $catStmt->execute([$slug]);
-            $cat = $catStmt->fetch();
-            if ($cat) { $fields[] = "categoria_id = ?"; $params[] = $cat['id']; }
-        }
-        if (isset($body['price']) || isset($body['precio'])) {
-            $fields[] = "precio = ?";
-            $params[] = (float)($body['price'] ?? $body['precio']);
-        }
-        if (array_key_exists('oldPrice', $body) || array_key_exists('precio_viejo', $body)) {
-            $pv = $body['oldPrice'] ?? $body['precio_viejo'];
-            $fields[] = "precio_viejo = ?";
-            $params[] = $pv ?: null;
-        }
-        foreach (['icono' => ['icon','icono'], 'descripcion' => ['description','descripcion']] as $col => $keys) {
-            foreach ($keys as $k) {
-                if (isset($body[$k])) { $fields[] = "$col = ?"; $params[] = $body[$k]; break; }
+        case 'listar':
+            $where  = "WHERE p.activo = 1";
+            $params = [];
+            if (!empty($_GET['categoria'])) {
+                $where .= " AND c.slug = ?";
+                $params[] = $_GET['categoria'];
             }
-        }
-        if (isset($body['activo'])) { $fields[] = "activo = ?"; $params[] = (int)$body['activo']; }
+            if (!empty($_GET['proveedor_id'])) {
+                $where .= " AND p.proveedor_id = ?";
+                $params[] = $_GET['proveedor_id'];
+            }
+            $stmt = $pdo->prepare("
+                SELECT p.*, c.slug AS categoria_slug, c.nombre AS categoria_nombre
+                FROM productos p
+                LEFT JOIN categorias c ON c.id = p.categoria_id
+                $where
+                ORDER BY p.id DESC
+            ");
+            $stmt->execute($params);
+            responder(true, $stmt->fetchAll());
 
-        if (empty($fields)) respond(['ok' => false, 'msg' => 'Nada que actualizar.']);
+        case 'obtener':
+            $id = (int)($_GET['id'] ?? 0);
+            if (!$id) responder(false, null, 'ID requerido.', 400);
+            $stmt = $pdo->prepare("
+                SELECT p.*, c.slug AS categoria_slug, c.nombre AS categoria_nombre
+                FROM productos p
+                LEFT JOIN categorias c ON c.id = p.categoria_id
+                WHERE p.id = ?
+            ");
+            $stmt->execute([$id]);
+            $prod = $stmt->fetch();
+            if (!$prod) responder(false, null, 'Producto no encontrado.', 404);
+            responder(true, $prod);
 
-        $params[] = $id;
-        $pdo->prepare("UPDATE productos SET " . implode(', ', $fields) . " WHERE id = ?")
-            ->execute($params);
+        case 'crear':
+            $d = bodyJson();
+            foreach (['nombre','precio','categoria_id'] as $c) {
+                if (empty($d[$c])) responder(false, null, "Campo '$c' requerido.", 400);
+            }
+            $stmt = $pdo->prepare("
+                INSERT INTO productos (nombre, descripcion, precio, precio_anterior, descuento, icono, categoria_id, proveedor_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            $precio    = (float)$d['precio'];
+            $precioAnt = isset($d['precio_anterior']) ? (float)$d['precio_anterior'] : null;
+            $descuento = ($precioAnt && $precioAnt > 0)
+                ? round((1 - $precio / $precioAnt) * 100)
+                : 0;
+            $stmt->execute([
+                trim($d['nombre']),
+                $d['descripcion'] ?? null,
+                $precio,
+                $precioAnt,
+                $descuento,
+                $d['icono'] ?? '📦',
+                (int)$d['categoria_id'],
+                $d['proveedor_id'] ?? null,
+            ]);
+            responder(true, ['id' => (int)$pdo->lastInsertId()], 'Producto creado.');
 
-        respond(['ok' => true, 'msg' => 'Producto actualizado.']);
-        break;
+        case 'actualizar':
+            $id = (int)($_GET['id'] ?? 0);
+            $d  = bodyJson();
+            if (!$id) responder(false, null, 'ID requerido.', 400);
 
-    // ─── ELIMINAR ─────────────────────────────────────────────
-    case 'delete':
-        $body = getBody();
-        $id   = (int)($body['id'] ?? $_GET['id'] ?? 0);
-        if (!$id) respond(['ok' => false, 'msg' => 'ID requerido.']);
-        getDB()->prepare("DELETE FROM productos WHERE id = ?")->execute([$id]);
-        respond(['ok' => true, 'msg' => 'Producto eliminado.']);
-        break;
+            $campos = [];
+            $params = [];
+            $map = ['nombre','descripcion','precio','precio_anterior','icono','categoria_id','proveedor_id','activo'];
+            foreach ($map as $f) {
+                if (array_key_exists($f, $d)) {
+                    $campos[] = "$f = ?";
+                    $params[] = $d[$f];
+                }
+            }
+            if (isset($d['precio']) && isset($d['precio_anterior']) && $d['precio_anterior'] > 0) {
+                $campos[] = "descuento = ?";
+                $params[] = round((1 - $d['precio'] / $d['precio_anterior']) * 100);
+            }
+            if (empty($campos)) responder(false, null, 'Nada que actualizar.', 400);
+            $params[] = $id;
+            $pdo->prepare("UPDATE productos SET " . implode(', ', $campos) . " WHERE id = ?")->execute($params);
+            responder(true, null, 'Producto actualizado.');
 
-    default:
-        respond(['ok' => false, 'msg' => 'Acción no encontrada.'], 404);
+        case 'eliminar':
+            $id = (int)($_GET['id'] ?? 0);
+            if (!$id) responder(false, null, 'ID requerido.', 400);
+            $pdo->prepare("UPDATE productos SET activo = 0 WHERE id = ?")->execute([$id]);
+            responder(true, null, 'Producto eliminado.');
+
+        default:
+            responder(false, null, 'Acción no válida.', 400);
+    }
+
+} catch (PDOException $e) {
+    responder(false, null, 'Error de base de datos: ' . $e->getMessage(), 500);
 }

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Cuenta - E-PeriTech</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../public/css/styles.css">
     <style>
         :root{--primary:#667eea;--dark:#764ba2;--bg:#f0f2ff;}
         body{background:var(--bg);}
@@ -185,25 +185,21 @@
     <div class="footer-bottom"><p>&copy; 2025 E-PeriTech.</p></div>
 </footer>
 
-<script src="database.js"></script>
+<script src="../app/database.js"></script>
 <script>
     DB.requireAuth('login.html');
     const session = DB.getSession();
-    if(session.role === 'proveedor') window.location.href = 'proveedor.html';
-
-    let user = null;
-
-    async function init() {
-        user = await DB.getUserById(session.userId);
-        loadHeader();
-        renderOverview();
+    if(session.role !== 'comprador' && session.role !== 'admin') {
+        // proveedores van a su panel
+        if(session.role === 'proveedor') window.location.href = 'proveedor.html';
     }
+    let user = DB.getUserById(session.userId);
 
     function loadHeader() {
         document.getElementById('userAvatar').textContent  = user.avatar || '👤';
         document.getElementById('userName').textContent    = user.nombre + ' ' + user.apellido;
         document.getElementById('userEmail').textContent   = user.email;
-        document.getElementById('memberSince').textContent = new Date(user.created_at).toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+        document.getElementById('memberSince').textContent = new Date(user.createdAt).toLocaleDateString('es-CO',{month:'long',year:'numeric'});
     }
 
     function switchPanel(name, btn) {
@@ -220,33 +216,33 @@
     function fmtMoney(n){ return '$'+Number(n).toLocaleString('es-CO'); }
     function badge(text,cls){ return `<span class="badge badge-${cls}">${text}</span>`; }
 
-    async function renderOverview() {
-        const orders = await DB.getOrdersByUser(session.userId);
-        const total  = orders.reduce((s,o)=>s+(parseFloat(o.total)||0),0);
+    function renderOverview() {
+        const orders = DB.getOrdersByUser(session.userId);
+        const total  = orders.reduce((s,o)=>s+o.total,0);
         document.getElementById('overviewStats').innerHTML = `
             <div class="mini-stat"><div class="mini-stat-val">${orders.length}</div><div class="mini-stat-lbl">Órdenes</div></div>
             <div class="mini-stat"><div class="mini-stat-val">${orders.filter(o=>o.estado==='pendiente').length}</div><div class="mini-stat-lbl">Pendientes</div></div>
             <div class="mini-stat"><div class="mini-stat-val" style="font-size:18px;">${fmtMoney(total)}</div><div class="mini-stat-lbl">Total gastado</div></div>
         `;
-        const last3 = orders.slice(0,3);
+        const last3 = orders.slice(-3).reverse();
         document.getElementById('recentOrders').innerHTML = last3.length
             ? last3.map(o=>`<tr>
                 <td><code style="font-size:11px;">${o.id}</code></td>
-                <td>${(o.productos||[]).map(p=>p.nombre_snap||p.nombre).join(', ')}</td>
+                <td>${o.productos.map(p=>p.nombre).join(', ')}</td>
                 <td>${fmtMoney(o.total)}</td>
                 <td>${badge(o.estado,o.estado)}</td>
                 <td>${fmtDate(o.fecha)}</td></tr>`).join('')
             : '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📭</div><h4>Sin órdenes aún</h4><p>Explora los productos de la tienda</p></div></td></tr>';
     }
 
-    async function renderAllOrders() {
-        const orders = (await DB.getOrdersByUser(session.userId)).slice().reverse();
+    function renderAllOrders() {
+        const orders = DB.getOrdersByUser(session.userId).slice().reverse();
         const el = document.getElementById('allOrders');
         if (!el) return;
         el.innerHTML = orders.length
             ? orders.map(o=>`<tr>
                 <td><code style="font-size:11px;">${o.id}</code></td>
-                <td>${(o.productos||[]).map(p=>`<div style="font-size:13px;"><strong>${p.nombre_snap||p.nombre}</strong> ×${p.cantidad||1} <span style="color:#888;font-size:11px;">${fmtMoney(p.precio_snap||p.precio)}</span></div>`).join('')}</td>
+                <td>${o.productos.map(p=>`<div style="font-size:13px;"><strong>${p.nombre}</strong> ×${p.cantidad||1} <span style="color:#888;font-size:11px;">${fmtMoney(p.precio)}</span></div>`).join('')}</td>
                 <td><strong>${fmtMoney(o.total)}</strong></td>
                 <td>${badge(o.estado,o.estado)}</td>
                 <td>${fmtDate(o.fecha)}</td></tr>`).join('')
@@ -254,39 +250,39 @@
     }
 
     function loadPerfilForm() {
-        document.getElementById('pNombre').value    = user.nombre    || '';
-        document.getElementById('pApellido').value  = user.apellido  || '';
-        document.getElementById('pTelefono').value  = user.telefono  || '';
-        document.getElementById('pDireccion').value = user.direccion || '';
+        const u = DB.getUserById(session.userId);
+        document.getElementById('pNombre').value    = u.nombre    || '';
+        document.getElementById('pApellido').value  = u.apellido  || '';
+        document.getElementById('pTelefono').value  = u.telefono  || '';
+        document.getElementById('pDireccion').value = u.direccion || '';
     }
 
-    async function savePerfil() {
+    function savePerfil() {
         const changes = {
             nombre:    document.getElementById('pNombre').value.trim(),
             apellido:  document.getElementById('pApellido').value.trim(),
             telefono:  document.getElementById('pTelefono').value.trim(),
             direccion: document.getElementById('pDireccion').value.trim(),
         };
-        const res = await DB.updateUser(session.userId, changes);
+        const res = DB.updateUser(session.userId, changes);
         const msg = document.getElementById('perfilMsg');
-        if(res.ok){ msg.textContent='✅ Perfil actualizado.'; msg.className='msg success'; user={...user,...changes}; loadHeader(); }
+        if(res.ok){ msg.textContent='✅ Perfil actualizado.'; msg.className='msg success'; user=res.user; loadHeader(); }
         else       { msg.textContent=res.msg; msg.className='msg error'; }
         setTimeout(()=>{ msg.className='msg'; },3000);
     }
 
-    async function changePassword() {
-        const actual  = document.getElementById('passActual').value;
-        const nueva   = document.getElementById('passNueva').value;
-        const confirm = document.getElementById('passConfirm').value;
+    function changePassword() {
+        const actual   = document.getElementById('passActual').value;
+        const nueva    = document.getElementById('passNueva').value;
+        const confirm  = document.getElementById('passConfirm').value;
+        const msg      = document.getElementById('passMsg');
         if(!actual || !nueva) return showPassMsg('Completa todos los campos.','error');
         if(nueva.length < 8)  return showPassMsg('Mínimo 8 caracteres.','error');
         if(nueva !== confirm)  return showPassMsg('Las contraseñas no coinciden.','error');
-
-        // Verificar contraseña actual usando login
-        const check = await DB._post('auth','login',{email: user.email, password: actual});
-        if(!check.ok) return showPassMsg('Contraseña actual incorrecta.','error');
-
-        await DB.updateUser(session.userId,{password: nueva});
+        // verify current
+        const u = DB.getUserById(session.userId);
+        if(u.password !== DB._hash(actual)) return showPassMsg('Contraseña actual incorrecta.','error');
+        DB.updateUser(session.userId,{password: nueva});
         showPassMsg('✅ Contraseña actualizada.','success');
         document.getElementById('passActual').value = '';
         document.getElementById('passNueva').value  = '';
@@ -299,12 +295,13 @@
         setTimeout(()=>{ msg.className='msg'; },3000);
     }
 
-    async function doLogout(){ await DB.logout(); window.location.href='index.html'; }
+    function doLogout(){ DB.logout(); window.location.href='index.html'; }
     function toggleMenu(){ document.getElementById('navLinks').classList.toggle('active'); }
     function toggleSearch(){ window.location.href='index.html'; }
 
-    init();
+    loadHeader();
+    renderOverview();
 </script>
-    <script src="cart.js"></script>
+    <script src="../app/cart.js"></script>
 </body>
 </html>

@@ -1,113 +1,103 @@
 <?php
-// api/ordenes.php — Órdenes de compra
-require_once __DIR__ . '/config.php';
+// ============================================================
+//  E-PeriTech — API Órdenes
+// ============================================================
+
+require_once 'config.php';
 session_start();
 
-$method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
-switch ($action) {
+try {
+    $pdo = getDB();
 
-    // ─── LISTAR TODAS (admin) ─────────────────────────────────
-    case 'list':
-        $pdo    = getDB();
-        $userId = $_GET['usuario_id'] ?? null;
+    switch ($action) {
 
-        if ($userId) {
-            $stmt = $pdo->prepare("SELECT * FROM v_ordenes WHERE comprador_email =
-                (SELECT email FROM usuarios WHERE id = ?) ORDER BY fecha DESC");
-            $stmt->execute([$userId]);
-        } else {
-            $stmt = $pdo->query("SELECT * FROM v_ordenes ORDER BY fecha DESC");
-        }
-        $ordenes = $stmt->fetchAll();
+        case 'listar':
+            $where  = '';
+            $params = [];
+            if (!empty($_GET['comprador_id'])) {
+                $where = "WHERE o.comprador_id = ?";
+                $params[] = $_GET['comprador_id'];
+            }
+            $stmt = $pdo->prepare("
+                SELECT o.*, u.nombre, u.apellido, u.email
+                FROM ordenes o
+                JOIN usuarios u ON u.id = o.comprador_id
+                $where
+                ORDER BY o.fecha DESC
+            ");
+            $stmt->execute($params);
+            $ordenes = $stmt->fetchAll();
 
-        // Adjuntar items a cada orden
-        foreach ($ordenes as &$o) {
-            $items = $pdo->prepare("SELECT * FROM orden_items WHERE orden_id = ?");
-            $items->execute([$o['id']]);
-            $o['productos'] = $items->fetchAll();
-        }
-        respond(['ok' => true, 'data' => $ordenes]);
-        break;
+            // Adjuntar items a cada orden
+            foreach ($ordenes as &$orden) {
+                $s2 = $pdo->prepare("
+                    SELECT oi.*, p.nombre AS producto_nombre
+                    FROM orden_items oi
+                    JOIN productos p ON p.id = oi.producto_id
+                    WHERE oi.orden_id = ?
+                ");
+                $s2->execute([$orden['id']]);
+                $orden['items'] = $s2->fetchAll();
+            }
+            responder(true, $ordenes);
 
-    // ─── ÓRDENES DE UN USUARIO ────────────────────────────────
-    case 'byUser':
-        $userId = $_GET['usuario_id'] ?? '';
-        if (!$userId) respond(['ok' => false, 'msg' => 'usuario_id requerido.']);
+        case 'obtener':
+            $id = (int)($_GET['id'] ?? 0);
+            if (!$id) responder(false, null, 'ID requerido.', 400);
+            $stmt = $pdo->prepare("SELECT * FROM ordenes WHERE id = ?");
+            $stmt->execute([$id]);
+            $orden = $stmt->fetch();
+            if (!$orden) responder(false, null, 'Orden no encontrada.', 404);
+            $s2 = $pdo->prepare("
+                SELECT oi.*, p.nombre AS producto_nombre
+                FROM orden_items oi
+                JOIN productos p ON p.id = oi.producto_id
+                WHERE oi.orden_id = ?
+            ");
+            $s2->execute([$id]);
+            $orden['items'] = $s2->fetchAll();
+            responder(true, $orden);
 
-        $pdo  = getDB();
-        $stmt = $pdo->prepare("
-            SELECT o.id, o.total, o.estado, o.fecha
-            FROM ordenes o
-            WHERE o.comprador_id = ?
-            ORDER BY o.fecha DESC
-        ");
-        $stmt->execute([$userId]);
-        $ordenes = $stmt->fetchAll();
+        case 'crear':
+            $d = bodyJson();
+            if (empty($d['comprador_id']) || empty($d['items'])) {
+                responder(false, null, 'comprador_id e items son requeridos.', 400);
+            }
+            $pdo->beginTransaction();
+            $total = array_sum(array_map(fn($i) => $i['precio'] * $i['cantidad'], $d['items']));
+            $stmt = $pdo->prepare("
+                INSERT INTO ordenes (comprador_id, total, estado) VALUES (?, ?, 'pendiente')
+            ");
+            $stmt->execute([$d['comprador_id'], $total]);
+            $ordenId = (int)$pdo->lastInsertId();
 
-        foreach ($ordenes as &$o) {
-            $items = $pdo->prepare("SELECT * FROM orden_items WHERE orden_id = ?");
-            $items->execute([$o['id']]);
-            $o['productos'] = $items->fetchAll();
-        }
-        respond(['ok' => true, 'data' => $ordenes]);
-        break;
+            $s2 = $pdo->prepare("
+                INSERT INTO orden_items (orden_id, producto_id, cantidad, precio_unitario)
+                VALUES (?, ?, ?, ?)
+            ");
+            foreach ($d['items'] as $item) {
+                $s2->execute([$ordenId, (int)$item['producto_id'], (int)$item['cantidad'], (float)$item['precio']]);
+            }
+            $pdo->commit();
+            responder(true, ['id' => $ordenId], 'Orden creada.');
 
-    // ─── CREAR ORDEN ──────────────────────────────────────────
-    case 'create':
-        if ($method !== 'POST') respond(['ok' => false, 'msg' => 'Método no permitido'], 405);
+        case 'estado':
+            $id     = (int)($_GET['id'] ?? 0);
+            $d      = bodyJson();
+            $estado = $d['estado'] ?? '';
+            $validos = ['pendiente','procesando','enviado','entregado','cancelado'];
+            if (!$id || !in_array($estado, $validos)) {
+                responder(false, null, 'ID o estado inválido.', 400);
+            }
+            $pdo->prepare("UPDATE ordenes SET estado = ? WHERE id = ?")->execute([$estado, $id]);
+            responder(true, null, 'Estado actualizado.');
 
-        $body       = getBody();
-        $compradorId = $body['compradorId'] ?? $body['comprador_id'] ?? '';
-        $productos  = $body['productos'] ?? [];
-        $total      = (float)($body['total'] ?? 0);
+        default:
+            responder(false, null, 'Acción no válida.', 400);
+    }
 
-        if (!$compradorId || empty($productos) || $total <= 0)
-            respond(['ok' => false, 'msg' => 'Faltan datos de la orden.']);
-
-        $pdo   = getDB();
-        $ordId = 'ORD-' . time();
-
-        $pdo->prepare("INSERT INTO ordenes (id, comprador_id, total) VALUES (?, ?, ?)")
-            ->execute([$ordId, $compradorId, $total]);
-
-        $itemStmt = $pdo->prepare("
-            INSERT INTO orden_items (orden_id, producto_id, nombre_snap, precio_snap, cantidad)
-            VALUES (?, ?, ?, ?, ?)
-        ");
-        foreach ($productos as $item) {
-            $itemStmt->execute([
-                $ordId,
-                (int)($item['productoId'] ?? $item['producto_id']),
-                $item['nombre'] ?? '',
-                (float)($item['precio'] ?? 0),
-                (int)($item['cantidad'] ?? 1),
-            ]);
-        }
-
-        respond(['ok' => true, 'order' => ['id' => $ordId, 'estado' => 'pendiente']]);
-        break;
-
-    // ─── ACTUALIZAR ESTADO ────────────────────────────────────
-    case 'updateStatus':
-        if ($method !== 'POST' && $method !== 'PUT')
-            respond(['ok' => false, 'msg' => 'Método no permitido'], 405);
-
-        $body   = getBody();
-        $ordId  = $body['orderId'] ?? $body['id'] ?? '';
-        $estado = $body['estado'] ?? '';
-
-        $validos = ['pendiente','procesando','enviado','entregado','cancelado'];
-        if (!$ordId || !in_array($estado, $validos))
-            respond(['ok' => false, 'msg' => 'ID u estado inválido.']);
-
-        getDB()->prepare("UPDATE ordenes SET estado = ? WHERE id = ?")
-               ->execute([$estado, $ordId]);
-
-        respond(['ok' => true, 'msg' => 'Estado actualizado.']);
-        break;
-
-    default:
-        respond(['ok' => false, 'msg' => 'Acción no encontrada.'], 404);
+} catch (PDOException $e) {
+    responder(false, null, 'Error de base de datos: ' . $e->getMessage(), 500);
 }

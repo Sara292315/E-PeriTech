@@ -141,7 +141,7 @@ const Cart = {
     },
 
     // ─── CHECKOUT ───────────────────────────────────────────────────────
-    async checkout() {
+    checkout() {
         const session = (typeof DB !== 'undefined') ? DB.getSession() : null;
         if (!session) {
             this.closePanel();
@@ -151,21 +151,23 @@ const Cart = {
         const items = this.getItems();
         if (!items.length) return;
 
+        // Crear orden
         const productos = items.map(i => ({
             productoId: i.id,
             nombre:     i.name,
             precio:     i.price,
             cantidad:   i.cantidad,
         }));
-        const result = await DB.createOrder(session.userId, productos, this.getTotal());
+        const result = DB.createOrder(session.userId, productos, this.getTotal());
 
         if (result.ok) {
             this.clear();
             this.closePanel();
             this.showToast('🎉 ¡Compra realizada con éxito!');
-            setTimeout(() => { window.location.href = 'micuenta.html'; }, 1500);
-        } else {
-            this.showToast('❌ Error al procesar la compra. Intenta de nuevo.');
+            // Redirigir a mis compras tras 1.5s
+            setTimeout(() => {
+                window.location.href = 'micuenta.html';
+            }, 1500);
         }
     },
 

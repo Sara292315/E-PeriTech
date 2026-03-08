@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - E-PeriTech</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../public/css/styles.css">
     <style>
         :root { --primary:#667eea; --dark:#764ba2; --bg:#f0f2ff; }
         body   { background: var(--bg); min-height:100vh; }
@@ -262,9 +262,6 @@
             <div class="nav-item" onclick="showPage('ordenes')">
                 <span class="nav-icon">📦</span> Órdenes
             </div>
-            <div class="nav-item" onclick="showPage('productos')">
-                <span class="nav-icon">🛍️</span> Productos
-            </div>
         </nav>
         <div class="sidebar-bottom">
             <div style="font-size:14px;opacity:.7;margin-bottom:12px;" id="sidebarUser"></div>
@@ -362,34 +359,6 @@
             </div>
         </div>
 
-        <!-- PRODUCTOS -->
-        <div id="page-productos" class="page-panel">
-            <div class="page-title">Productos</div>
-            <div class="page-sub">Gestión del catálogo completo</div>
-            <div class="section-card">
-                <div class="section-header">
-                    <h3>Todos los Productos</h3>
-                </div>
-                <div class="search-filter">
-                    <input type="text" id="searchProducto" placeholder="Buscar por nombre..." oninput="renderProductosAdmin()">
-                    <select id="filterCategoria" onchange="renderProductosAdmin()">
-                        <option value="">Todas las categorías</option>
-                        <option value="mouse">Mouse</option>
-                        <option value="teclado">Teclado</option>
-                        <option value="monitor">Monitor</option>
-                        <option value="audifonos">Audífonos</option>
-                        <option value="otros">Otros</option>
-                    </select>
-                </div>
-                <table>
-                    <thead><tr>
-                        <th>ID</th><th>Icono</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Proveedor</th><th>Estado</th><th>Acciones</th>
-                    </tr></thead>
-                    <tbody id="tablaProductos"></tbody>
-                </table>
-            </div>
-        </div>
-
     </main>
 </div>
 
@@ -405,7 +374,7 @@
     </div>
 </div>
 
-<script src="database.js"></script>
+<script src="../app/database.js"></script>
 <script>
     // ── Auth guard
     DB.requireRole('admin', 'login.html');
@@ -422,43 +391,72 @@
         if (name === 'usuarios')    renderCompradores();
         if (name === 'proveedores') renderProveedores();
         if (name === 'ordenes')     renderOrdenes();
-        if (name === 'productos')   renderProductosAdmin();
     }
 
     function fmtDate(iso) {
         return new Date(iso).toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});
     }
-    function fmtMoney(n) { return '$' + Number(n).toLocaleString('es-CO'); }
-    function badge(text, cls) { return `<span class="badge badge-${cls}">${text}</span>`; }
+    function fmtMoney(n) {
+        return '$' + Number(n).toLocaleString('es-CO');
+    }
+    function badge(text, cls) {
+        return `<span class="badge badge-${cls}">${text}</span>`;
+    }
 
     // ── DASHBOARD
-    async function renderDashboard() {
-        const s    = await DB.getStats();
+    function renderDashboard() {
+        const s = DB.getStats();
         const grid = document.getElementById('statsGrid');
         grid.innerHTML = `
-            <div class="stat-card blue"><div class="stat-icon">👥</div><div class="stat-value">${s.total_usuarios||0}</div><div class="stat-label">Usuarios totales</div></div>
-            <div class="stat-card green"><div class="stat-icon">🛒</div><div class="stat-value">${s.total_compradores||0}</div><div class="stat-label">Compradores</div></div>
-            <div class="stat-card purple"><div class="stat-icon">🏭</div><div class="stat-value">${s.total_proveedores||0}</div><div class="stat-label">Proveedores</div></div>
-            <div class="stat-card red"><div class="stat-icon">📦</div><div class="stat-value">${s.total_ordenes||0}</div><div class="stat-label">Órdenes</div></div>
-            <div class="stat-card green"><div class="stat-icon">💰</div><div class="stat-value" style="font-size:22px;">${fmtMoney(s.ingreso_total||0)}</div><div class="stat-label">Ingresos totales</div></div>
-            <div class="stat-card red"><div class="stat-icon">⏳</div><div class="stat-value">${s.ordenes_pendientes||0}</div><div class="stat-label">Órdenes pendientes</div></div>
+            <div class="stat-card blue">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value">${s.totalUsuarios}</div>
+                <div class="stat-label">Usuarios totales</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-icon">🛒</div>
+                <div class="stat-value">${s.totalCompradores}</div>
+                <div class="stat-label">Compradores</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-icon">🏭</div>
+                <div class="stat-value">${s.totalProveedores}</div>
+                <div class="stat-label">Proveedores</div>
+            </div>
+            <div class="stat-card red">
+                <div class="stat-icon">📦</div>
+                <div class="stat-value">${s.totalOrdenes}</div>
+                <div class="stat-label">Órdenes</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value" style="font-size:22px;">${fmtMoney(s.ingresoTotal)}</div>
+                <div class="stat-label">Ingresos totales</div>
+            </div>
+            <div class="stat-card red">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-value">${s.ordenesPendientes}</div>
+                <div class="stat-label">Órdenes pendientes</div>
+            </div>
         `;
 
-        const orders = await DB.getOrders();
-        const last5  = orders.slice(-5).reverse();
-        document.getElementById('dashOrders').innerHTML = last5.map(o => `<tr>
-            <td><code style="font-size:12px;">${o.id}</code></td>
-            <td>${o.comprador_nombre ? o.comprador_nombre + ' ' + o.comprador_apellido : o.comprador_id}</td>
-            <td>${fmtMoney(o.total)}</td>
-            <td>${badge(o.estado, o.estado)}</td>
-            <td>${fmtDate(o.fecha)}</td>
-        </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:#aaa;">Sin órdenes</td></tr>';
+        const orders = DB.getOrders().slice(-5).reverse();
+        document.getElementById('dashOrders').innerHTML = orders.map(o => {
+            const u = DB.getUserById(o.compradorId);
+            return `<tr>
+                <td><code style="font-size:12px;">${o.id}</code></td>
+                <td>${u ? u.nombre + ' ' + u.apellido : o.compradorId}</td>
+                <td>${fmtMoney(o.total)}</td>
+                <td>${badge(o.estado, o.estado)}</td>
+                <td>${fmtDate(o.fecha)}</td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="5" style="text-align:center;color:#aaa;">Sin órdenes</td></tr>';
     }
 
     // ── COMPRADORES
-    async function renderCompradores() {
-        const q     = (document.getElementById('searchComprador')?.value || '').toLowerCase();
-        const users = (await DB.getUsersByRole('comprador')).filter(u =>
+    function renderCompradores() {
+        const q = (document.getElementById('searchComprador')?.value || '').toLowerCase();
+        const users = DB.getUsersByRole('comprador').filter(u =>
             !q || u.nombre.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
         );
         document.getElementById('tablaCompradores').innerHTML = users.map(u => `
@@ -468,7 +466,7 @@
                 <td>${u.email}</td>
                 <td>${u.telefono || '—'}</td>
                 <td>${badge(u.activo ? 'Activo' : 'Inactivo', u.activo ? 'activo' : 'inactivo')}</td>
-                <td>${fmtDate(u.created_at)}</td>
+                <td>${fmtDate(u.createdAt)}</td>
                 <td>
                     <button class="btn-sm btn-warning-sm" onclick="toggleActive('${u.id}')">
                         ${u.activo ? '🔒 Desactivar' : '🔓 Activar'}
@@ -479,9 +477,9 @@
     }
 
     // ── PROVEEDORES
-    async function renderProveedores() {
-        const q     = (document.getElementById('searchProveedor')?.value || '').toLowerCase();
-        const users = (await DB.getUsersByRole('proveedor')).filter(u =>
+    function renderProveedores() {
+        const q = (document.getElementById('searchProveedor')?.value || '').toLowerCase();
+        const users = DB.getUsersByRole('proveedor').filter(u =>
             !q || (u.empresa||'').toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
         );
         document.getElementById('tablaProveedores').innerHTML = users.map(u => `
@@ -494,62 +492,26 @@
                 <td>${badge(u.verificado ? 'Verificado' : 'Pendiente', u.verificado ? 'verificado' : 'no-verif')}</td>
                 <td>
                     <button class="btn-sm btn-success-sm" onclick="verifyProv('${u.id}')">✅ Verificar</button>
-                    <button class="btn-sm btn-warning-sm" onclick="toggleActive('${u.id}','proveedor')">${u.activo ? '🔒' : '🔓'}</button>
+                    <button class="btn-sm btn-warning-sm" onclick="toggleActive('${u.id}','proveedor')">
+                        ${u.activo ? '🔒' : '🔓'}
+                    </button>
                     <button class="btn-sm btn-danger-sm" onclick="deleteUser('${u.id}','proveedor')">🗑️</button>
                 </td>
             </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;color:#aaa;">Sin proveedores</td></tr>';
     }
 
-    // ── PRODUCTOS (admin)
-    async function renderProductosAdmin() {
-        const q    = (document.getElementById('searchProducto')?.value || '').toLowerCase();
-        const cat  = document.getElementById('filterCategoria')?.value || '';
-        const all  = await DB.getProducts(false);
-        const list = all.filter(p =>
-            (!q   || p.name.toLowerCase().includes(q)) &&
-            (!cat || p.category === cat)
-        );
-        document.getElementById('tablaProductos').innerHTML = list.map(p => `
-            <tr>
-                <td><code style="font-size:11px;">${p.id}</code></td>
-                <td style="font-size:22px;text-align:center;">${p.icon}</td>
-                <td><strong>${p.name}</strong></td>
-                <td>${p.category}</td>
-                <td>$${Number(p.price).toLocaleString('es-CO')}</td>
-                <td style="font-size:12px;color:#888;">${p.proveedor || '—'}</td>
-                <td>${badge(p.activo ? 'Activo' : 'Inactivo', p.activo ? 'activo' : 'inactivo')}</td>
-                <td>
-                    <button class="btn-sm btn-warning-sm" onclick="toggleProductoActivo(${p.id}, ${p.activo ? 1 : 0})">
-                        ${p.activo ? '🔒 Ocultar' : '🔓 Mostrar'}
-                    </button>
-                    <button class="btn-sm btn-danger-sm" onclick="deleteProductoAdmin(${p.id}, '${p.name.replace(/'/g,"\\'")}')">🗑️ Eliminar</button>
-                </td>
-            </tr>`).join('') || '<tr><td colspan="8" style="text-align:center;color:#aaa;">Sin productos</td></tr>';
-    }
-
-    async function toggleProductoActivo(id, activo) {
-        await DB.updateProduct(id, { activo: activo ? 0 : 1 });
-        renderProductosAdmin();
-    }
-
-    async function deleteProductoAdmin(id, nombre) {
-        if (!confirm(`¿Eliminar el producto "${nombre}"?\nEsta acción no se puede deshacer.`)) return;
-        await DB.deleteProduct(id);
-        renderProductosAdmin();
-    }
-
     // ── ÓRDENES
-    async function renderOrdenes() {
+    function renderOrdenes() {
         const estado = document.getElementById('filterEstado')?.value || '';
-        let orders   = await DB.getOrders();
+        let orders = DB.getOrders();
         if (estado) orders = orders.filter(o => o.estado === estado);
         orders = orders.slice().reverse();
         document.getElementById('tablaOrdenes').innerHTML = orders.map(o => {
-            const nombre = o.comprador_nombre ? o.comprador_nombre + ' ' + o.comprador_apellido : o.comprador_id;
-            const prods  = (o.productos || []).map(p => p.nombre_snap || p.nombre).join(', ');
+            const u = DB.getUserById(o.compradorId);
+            const prods = o.productos.map(p => p.nombre).join(', ');
             return `<tr>
                 <td><code style="font-size:11px;">${o.id}</code></td>
-                <td>${nombre}</td>
+                <td>${u ? u.nombre + ' ' + u.apellido : o.compradorId}</td>
                 <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${prods}">${prods}</td>
                 <td>${fmtMoney(o.total)}</td>
                 <td>${badge(o.estado, o.estado)}</td>
@@ -558,8 +520,6 @@
                     <select style="padding:5px;border:1px solid #ddd;border-radius:6px;font-size:12px;"
                         onchange="changeOrderStatus('${o.id}',this.value)">
                         <option ${o.estado==='pendiente'?'selected':''} value="pendiente">Pendiente</option>
-                        <option ${o.estado==='procesando'?'selected':''} value="procesando">Procesando</option>
-                        <option ${o.estado==='enviado'?'selected':''} value="enviado">Enviado</option>
                         <option ${o.estado==='entregado'?'selected':''} value="entregado">Entregado</option>
                         <option ${o.estado==='cancelado'?'selected':''} value="cancelado">Cancelado</option>
                     </select>
@@ -569,27 +529,27 @@
     }
 
     // ── ACTIONS
-    async function toggleActive(id, page) {
-        const u = await DB.getUserById(id);
-        if (!u) return;
-        await DB.updateUser(id, { activo: u.activo ? 0 : 1 });
+    function toggleActive(id, page) {
+        const u = DB.getUserById(id);
+        DB.updateUser(id, { activo: !u.activo });
         page === 'proveedor' ? renderProveedores() : renderCompradores();
     }
 
-    async function verifyProv(id) {
-        await DB.updateUser(id, { verificado: 1 });
+    function verifyProv(id) {
+        DB.updateUser(id, { verificado: true });
         renderProveedores();
     }
 
-    async function deleteUser(id, page) {
+    function deleteUser(id, page) {
         if (!confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) return;
-        await DB.deleteUser(id);
+        DB.deleteUser(id);
         page === 'proveedor' ? renderProveedores() : renderCompradores();
         renderDashboard();
     }
 
-    async function changeOrderStatus(id, estado) {
-        await DB.updateOrderStatus(id, estado);
+    function changeOrderStatus(id, estado) {
+        DB.updateOrderStatus(id, estado);
+        renderOrdenes();
     }
 
     // ── MODAL
@@ -615,7 +575,7 @@
 
     function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 
-    async function submitModal() {
+    function submitModal() {
         const nombre   = document.getElementById('mNombre')?.value.trim();
         const apellido = document.getElementById('mApellido')?.value.trim();
         const email    = document.getElementById('mEmail')?.value.trim();
@@ -627,7 +587,7 @@
         if (!nombre || !apellido || !email || !pass)
             return alert('Completa todos los campos obligatorios.');
 
-        const res = await DB.createUser({ nombre, apellido, email, telefono, password: pass,
+        const res = DB.createUser({ nombre, apellido, email, telefono, password: pass,
             role: _modalRole, empresa, nit });
         if (!res.ok) return alert(res.msg);
         closeModal();
@@ -635,7 +595,7 @@
         renderDashboard();
     }
 
-    async function doLogout() { await DB.logout(); window.location.href = 'login.html'; }
+    function doLogout() { DB.logout(); window.location.href = 'login.html'; }
 
     // Init
     renderDashboard();

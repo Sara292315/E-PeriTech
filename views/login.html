@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - E-PeriTech</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../public/css/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -323,7 +323,7 @@
         </div>
     </footer>
 
-    <script src="database.js"></script>
+    <script src="../app/database.js"></script>
     <script>
         // Redirigir si ya está logueado
         const existing = DB.getSession();
@@ -368,18 +368,17 @@
                 role === 'proveedor' ? 'block' : 'none';
         }
 
-        async function doLogin() {
+        function doLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             const pass  = document.getElementById('loginPass').value;
             if (!email || !pass) { showMsg('Por favor completa todos los campos.', 'error'); return; }
-            showMsg('Verificando...', 'info');
-            const res = await DB.login(email, pass);
+            const res = DB.login(email, pass);
             if (!res.ok) { showMsg(res.msg, 'error'); return; }
-            showMsg('✅ Bienvenido, ' + res.session.nombre + '! Redirigiendo...', 'success');
-            setTimeout(() => redirectByRole(res.session.role), 900);
+            showMsg('✅ Bienvenido, ' + res.user.nombre + '! Redirigiendo...', 'success');
+            setTimeout(() => redirectByRole(res.user.role), 900);
         }
 
-        async function doRegister() {
+        function doRegister() {
             const nombre   = document.getElementById('regNombre').value.trim();
             const apellido = document.getElementById('regApellido').value.trim();
             const email    = document.getElementById('regEmail').value.trim();
@@ -399,13 +398,12 @@
             if (role === 'proveedor' && !empresa)
                 return showMsg('Ingresa el nombre de tu empresa.', 'error');
 
-            showMsg('Creando cuenta...', 'info');
-            const res = await DB.createUser({ nombre, apellido, email, password: pass, telefono, role, empresa, nit });
+            const res = DB.createUser({ nombre, apellido, email, password: pass, telefono, role, empresa, nit });
             if (!res.ok) return showMsg(res.msg, 'error');
 
-            showMsg('✅ Cuenta creada. Iniciando sesión...', 'success');
-            const loginRes = await DB.login(email, pass);
-            setTimeout(() => redirectByRole(loginRes.session.role), 1000);
+            showMsg('✅ Cuenta creada correctamente. Iniciando sesión...', 'success');
+            const loginRes = DB.login(email, pass);
+            setTimeout(() => redirectByRole(loginRes.user.role), 1000);
         }
 
         document.addEventListener('keydown', e => {

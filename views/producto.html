@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detalles del Producto - E-PeriTech</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../public/css/styles.css">
     <style>
         .product-detail-container {
             max-width: 1200px;
@@ -349,14 +349,6 @@
                     </button>
                 </div>
 
-                <!-- Botón eliminar (visible solo para admin o proveedor dueño) -->
-                <div id="adminActions" style="display:none;margin-top:14px;">
-                    <button onclick="deleteCurrentProduct()"
-                        style="width:100%;padding:12px;background:#ef4444;color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">
-                        🗑️ Eliminar este producto
-                    </button>
-                </div>
-
                 <div class="product-meta">
                     <div class="meta-item">
                         <span class="meta-label">Categoría:</span>
@@ -432,13 +424,16 @@
         </div>
     </footer>
 
-    <script src="script.js"></script>
-    <script src="product-detail.js"></script>
-    <script src="cart.js"></script>
+    <script src="../app/script.js"></script>
+    <script src="../app/product-detail.js"></script>
+    <script src="../app/cart.js"></script>
     <script>
     // Agregar producto actual al carrito
     function addCurrentToCart() {
-        const product = window._currentProduct;
+        const id   = parseInt(localStorage.getItem('selectedProduct'));
+        if (!id) return;
+        // products está definido en script.js
+        const product = (typeof products !== 'undefined') ? products.find(p => p.id === id) : null;
         if (!product) { Cart.showToast('❌ Producto no encontrado'); return; }
         Cart.addItem(product);
     }

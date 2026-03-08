@@ -1,9 +1,10 @@
+// Productos: se leen desde database.js (localStorage) para reflejar cambios de proveedores
+// Si DB no está disponible se usa el array de respaldo
 let products = [];
 
-async function loadProducts() {
+function loadProducts() {
     if (typeof DB !== 'undefined') {
-        const all = await DB.getProducts();
-        products = all.filter(p => p.activo !== false);
+        products = DB.getProducts().filter(p => p.activo !== false);
     }
 }
 
@@ -191,8 +192,8 @@ function clearSearch() {
 }
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', async function() {
-    await loadProducts();
+document.addEventListener('DOMContentLoaded', function() {
+    loadProducts();
     renderProducts();
 });
 // ─── AUTH INTEGRATION ───────────────────────────────────────────────────────
@@ -207,6 +208,7 @@ function renderNavAuth() {
     const navIcons = document.querySelector('.nav-icons');
     if (!navIcons) return;
 
+    // Remove old user btn if present
     const old = document.getElementById('navUserBtn');
     if (old) old.remove();
 

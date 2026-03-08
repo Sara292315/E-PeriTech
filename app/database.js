@@ -1,0 +1,170 @@
+/**
+ * E-PeriTech — database.js
+ * Capa de datos: conecta con la API PHP → MariaDB
+ * Reemplaza el uso de localStorage por llamadas reales al servidor.
+ */
+
+const API = {
+    BASE: '../api',   // Ruta relativa desde /views/ hacia /api/
+
+    async _fetch(url, method = 'GET', body = null) {
+        const opts = {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+        };
+        if (body) opts.body = JSON.stringify(body);
+        const res  = await fetch(url, opts);
+        const data = await res.json();
+        return data;
+    },
+
+    // ── USUARIOS ──────────────────────────────────────────────────────
+
+    async registrar(datos) {
+        return this._fetch(`${this.BASE}/usuarios.php?action=registro`, 'POST', datos);
+    },
+
+    async login(email, password) {
+        const res = await this._fetch(`${this.BASE}/usuarios.php?action=login`, 'POST', { email, password });
+        if (res.ok && res.data) {
+            localStorage.setItem('eperitech_session', JSON.stringify({
+                userId:  res.data.id,
+                rol:     res.data.rol,
+                nombre:  res.data.nombre,
+                email:   res.data.email,
+                avatar:  res.data.avatar,
+            }));
+        }
+        return res;
+    },
+
+    async logout() {
+        localStorage.removeItem('eperitech_session');
+        return this._fetch(`${this.BASE}/usuarios.php?action=logout`, 'POST');
+    },
+
+    async getSesion() {
+        return this._fetch(`${this.BASE}/usuarios.php?action=sesion`);
+    },
+
+    getSession() {
+        return JSON.parse(localStorage.getItem('eperitech_session') || 'null');
+    },
+
+    isLoggedIn()  { return !!this.getSession(); },
+    isAdmin()     { return this.getSession()?.rol === 'admin'; },
+    isProveedor() { return this.getSession()?.rol === 'proveedor'; },
+    isComprador() { return this.getSession()?.rol === 'comprador'; },
+
+    requireAuth(redirect = 'login.html') {
+        if (!this.isLoggedIn()) { window.location.href = redirect; return false; }
+        return true;
+    },
+
+    requireRole(rol, redirect = 'login.html') {
+        const s = this.getSession();
+        if (!s || s.rol !== rol) { window.location.href = redirect; return false; }
+        return true;
+    },
+
+    async listarUsuarios(rol = '') {
+        const qs = rol ? `&rol=${rol}` : '';
+        return this._fetch(`${this.BASE}/usuarios.php?action=listar${qs}`);
+    },
+
+    async getUsuario(id) {
+        return this._fetch(`${this.BASE}/usuarios.php?action=obtener&id=${id}`);
+    },
+
+    async actualizarUsuario(id, datos) {
+        return this._fetch(`${this.BASE}/usuarios.php?action=actualizar&id=${id}`, 'PUT', datos);
+    },
+
+    async eliminarUsuario(id) {
+        return this._fetch(`${this.BASE}/usuarios.php?action=eliminar&id=${id}`, 'DELETE');
+    },
+
+    // ── PRODUCTOS ─────────────────────────────────────────────────────
+
+    async getProducts(categoria = '', proveedorId = '') {
+        let qs = '';
+        if (categoria)   qs += `&categoria=${categoria}`;
+        if (proveedorId) qs += `&proveedor_id=${proveedorId}`;
+        return this._fetch(`${this.BASE}/productos.php?action=listar${qs}`);
+    },
+
+    async getProduct(id) {
+        return this._fetch(`${this.BASE}/productos.php?action=obtener&id=${id}`);
+    },
+
+    async createProduct(datos) {
+        return this._fetch(`${this.BASE}/productos.php?action=crear`, 'POST', datos);
+    },
+
+    async updateProduct(id, datos) {
+        return this._fetch(`${this.BASE}/productos.php?action=actualizar&id=${id}`, 'PUT', datos);
+    },
+
+    async deleteProduct(id) {
+        return this._fetch(`${this.BASE}/productos.php?action=eliminar&id=${id}`, 'DELETE');
+    },
+
+    // ── ÓRDENES ───────────────────────────────────────────────────────
+
+    async getOrders(compradorId = '') {
+        const qs = compradorId ? `&comprador_id=${compradorId}` : '';
+        return this._fetch(`${this.BASE}/ordenes.php?action=listar${qs}`);
+    },
+
+    async getOrder(id) {
+        return this._fetch(`${this.BASE}/ordenes.php?action=obtener&id=${id}`);
+    },
+
+    async createOrder(compradorId, items) {
+        return this._fetch(`${this.BASE}/ordenes.php?action=crear`, 'POST', { comprador_id: compradorId, items });
+    },
+
+    async updateOrderStatus(id, estado) {
+        return this._fetch(`${this.BASE}/ordenes.php?action=estado&id=${id}`, 'PUT', { estado });
+    },
+
+    // ── CARRITO (localStorage — temporal pre-compra) ──────────────────
+
+    getCart() {
+        return JSON.parse(localStorage.getItem('eperitech_cart') || '[]');
+    },
+    saveCart(items) {
+        localStorage.setItem('eperitech_cart', JSON.stringify(items));
+    },
+    addToCart(producto, cantidad = 1) {
+        const cart = this.getCart();
+        const idx  = cart.findIndex(i => i.producto_id === producto.id);
+        if (idx >= 0) {
+            cart[idx].cantidad += cantidad;
+        } else {
+            cart.push({
+                producto_id: producto.id,
+                nombre:      producto.nombre || producto.name,
+                precio:      producto.precio || producto.price,
+                cantidad,
+            });
+        }
+        this.saveCart(cart);
+        return cart;
+    },
+    removeFromCart(productoId) {
+        this.saveCart(this.getCart().filter(i => i.producto_id !== productoId));
+    },
+    clearCart() {
+        localStorage.removeItem('eperitech_cart');
+    },
+    getCartTotal() {
+        return this.getCart().reduce((s, i) => s + i.precio * i.cantidad, 0);
+    },
+    getCartCount() {
+        return this.getCart().reduce((s, i) => s + i.cantidad, 0);
+    },
+};
+
+// Alias DB → API para compatibilidad con código existente
+const DB = API;
