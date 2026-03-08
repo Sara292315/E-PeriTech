@@ -1,10 +1,35 @@
-// Productos: se leen desde database.js (localStorage) para reflejar cambios de proveedores
-// Si DB no está disponible se usa el array de respaldo
+// Productos: se leen desde database.js (API) para reflejar cambios de proveedores
 let products = [];
 
-function loadProducts() {
-    if (typeof DB !== 'undefined') {
-        products = DB.getProducts().filter(p => p.activo !== false);
+async function loadProducts() {
+    if (typeof DB !== 'undefined' && DB.getProducts) {
+        try {
+            const response = await DB.getProducts();
+            if (response && response.ok && response.data) {
+                // Mapear campos de la API a la estructura esperada por el frontend
+                products = response.data.map(p => ({
+                    id: p.id,
+                    name: p.nombre,
+                    price: parseFloat(p.precio),
+                    oldPrice: p.precio_anterior ? parseFloat(p.precio_anterior) : null,
+                    discount: p.descuento || 0,
+                    icon: p.icono || '📦',
+                    category: p.categoria_slug || '',
+                    categoryName: p.categoria_nombre || '',
+                    description: p.descripcion || '',
+                    activo: p.activo !== 0
+                })).filter(p => p.activo !== false);
+            } else {
+                console.error('Error al cargar productos:', response?.msg || 'Respuesta inválida');
+                products = [];
+            }
+        } catch (error) {
+            console.error('Error al cargar productos:', error);
+            products = [];
+        }
+    } else {
+        console.warn('DB.getProducts no está disponible');
+        products = [];
     }
 }
 
@@ -20,7 +45,19 @@ function formatPrice(price) {
 // Render products
 function renderProducts(filteredProducts = products) {
     const grid = document.getElementById('productsGrid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
+    
+    if (filteredProducts.length === 0) {
+        grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #888;">
+                <h3>😔 No hay productos disponibles</h3>
+                <p>No se encontraron productos en la base de datos.</p>
+            </div>
+        `;
+        return;
+    }
     
     filteredProducts.forEach(product => {
         const productCard = document.createElement('div');
@@ -192,8 +229,8 @@ function clearSearch() {
 }
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    loadProducts();
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadProducts();
     renderProducts();
 });
 // ─── AUTH INTEGRATION ───────────────────────────────────────────────────────
