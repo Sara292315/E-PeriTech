@@ -6,7 +6,7 @@
 
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');       // usuario de phpMyAdmin
-define('DB_PASS', '');           // contraseña (vacía por defecto en XAMPP)
+define('DB_PASS', '12345');           // contraseña (vacía por defecto en XAMPP)
 define('DB_NAME', 'eperitech');
 define('DB_PORT', 3306);
 

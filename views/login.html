@@ -327,11 +327,11 @@
     <script>
         // Redirigir si ya está logueado
         const existing = DB.getSession();
-        if (existing) redirectByRole(existing.role);
+        if (existing) redirectByRole(existing.rol);
 
-        function redirectByRole(role) {
-            if (role === 'admin')     window.location.href = 'admin.html';
-            else if (role === 'proveedor') window.location.href = 'proveedor.html';
+        function redirectByRole(rol) {
+            if (rol === 'admin')     window.location.href = 'admin.html';
+            else if (rol === 'proveedor') window.location.href = 'proveedor.html';
             else                          window.location.href = 'index.html';
         }
 
@@ -368,17 +368,18 @@
                 role === 'proveedor' ? 'block' : 'none';
         }
 
-        function doLogin() {
+        async function doLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             const pass  = document.getElementById('loginPass').value;
             if (!email || !pass) { showMsg('Por favor completa todos los campos.', 'error'); return; }
-            const res = DB.login(email, pass);
+            const res = await DB.login(email, pass);
             if (!res.ok) { showMsg(res.msg, 'error'); return; }
-            showMsg('✅ Bienvenido, ' + res.user.nombre + '! Redirigiendo...', 'success');
-            setTimeout(() => redirectByRole(res.user.role), 900);
+            const session = DB.getSession();
+            showMsg('✅ Bienvenido, ' + session.nombre + '! Redirigiendo...', 'success');
+            setTimeout(() => redirectByRole(session.rol), 900);
         }
 
-        function doRegister() {
+        async function doRegister() {
             const nombre   = document.getElementById('regNombre').value.trim();
             const apellido = document.getElementById('regApellido').value.trim();
             const email    = document.getElementById('regEmail').value.trim();
@@ -398,12 +399,15 @@
             if (role === 'proveedor' && !empresa)
                 return showMsg('Ingresa el nombre de tu empresa.', 'error');
 
-            const res = DB.createUser({ nombre, apellido, email, password: pass, telefono, role, empresa, nit });
+            const res = await DB.registrar({ nombre, apellido, email, password: pass, telefono, rol: role, empresa, nit });
             if (!res.ok) return showMsg(res.msg, 'error');
 
             showMsg('✅ Cuenta creada correctamente. Iniciando sesión...', 'success');
-            const loginRes = DB.login(email, pass);
-            setTimeout(() => redirectByRole(loginRes.user.role), 1000);
+            const loginRes = await DB.login(email, pass);
+            if (loginRes.ok) {
+                const session = DB.getSession();
+                setTimeout(() => redirectByRole(session.rol), 1000);
+            }
         }
 
         document.addEventListener('keydown', e => {

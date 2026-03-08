@@ -13,8 +13,30 @@ const API = {
             headers: { 'Content-Type': 'application/json' },
         };
         if (body) opts.body = JSON.stringify(body);
-        const res  = await fetch(url, opts);
-        const data = await res.json();
+        const res = await fetch(url, opts);
+        
+        // Verificar si la respuesta es exitosa
+        if (!res.ok) {
+            // Intentar leer el JSON del error si existe
+            let errorData;
+            try {
+                const text = await res.text();
+                errorData = text ? JSON.parse(text) : { msg: `Error ${res.status}: ${res.statusText}` };
+            } catch {
+                errorData = { msg: `Error ${res.status}: ${res.statusText}` };
+            }
+            return { ok: false, msg: errorData.msg || `Error del servidor (${res.status})`, data: null };
+        }
+        
+        // Leer el JSON de la respuesta
+        let data;
+        try {
+            const text = await res.text();
+            data = text ? JSON.parse(text) : { ok: false, msg: 'Respuesta vacía del servidor' };
+        } catch (e) {
+            return { ok: false, msg: 'Error al procesar la respuesta del servidor. Asegúrate de usar Apache/XAMPP, no un servidor estático.', data: null };
+        }
+        
         return data;
     },
 
