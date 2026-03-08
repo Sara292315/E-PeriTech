@@ -1,12 +1,15 @@
-// VERSIÓN DE PRUEBA - product-detail.js
+// product-detail.js - Carga productos desde la API
 console.log('✅ Archivo product-detail.js cargado correctamente');
+
+// Variable global para almacenar el producto actual
+let currentProduct = null;
 
 // Función para formatear precios
 function formatPrice(price) {
-    return '$' + price.toLocaleString('es-CO');
+    return '$' + Number(price).toLocaleString('es-CO');
 }
 
-// Datos de productos extendidos
+// Datos de productos extendidos (fallback si la API falla)
 const productsData = {
     1: {
         id: 1,
@@ -188,8 +191,8 @@ const productsData = {
 
 console.log('✅ Datos de productos cargados:', Object.keys(productsData).length, 'productos');
 
-// Cargar detalles del producto
-document.addEventListener('DOMContentLoaded', function() {
+// Cargar detalles del producto desde la API
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('🔄 DOMContentLoaded - Iniciando carga de producto...');
     
     const storedId = localStorage.getItem('selectedProduct');
@@ -205,15 +208,56 @@ document.addEventListener('DOMContentLoaded', function() {
     const productId = parseInt(storedId);
     console.log('🔢 ID convertido a número:', productId);
     
-    const product = productsData[productId];
-    console.log('🎯 Producto encontrado:', product ? product.name : 'NO ENCONTRADO');
+    let product = null;
+    
+    // Intentar cargar desde la API
+    if (typeof DB !== 'undefined' && DB.getProduct) {
+        try {
+            console.log('🌐 Intentando cargar producto desde API...');
+            const response = await DB.getProduct(productId);
+            if (response && response.ok && response.data) {
+                const apiProduct = response.data;
+                // Mapear campos de la API a la estructura esperada
+                product = {
+                    id: apiProduct.id,
+                    name: apiProduct.nombre,
+                    price: parseFloat(apiProduct.precio),
+                    oldPrice: apiProduct.precio_anterior ? parseFloat(apiProduct.precio_anterior) : null,
+                    discount: apiProduct.descuento || 0,
+                    icon: apiProduct.icono || '📦',
+                    category: apiProduct.categoria_slug || '',
+                    categoryName: apiProduct.categoria_nombre || '',
+                    description: apiProduct.descripcion || 'Sin descripción disponible.',
+                    activo: apiProduct.activo !== 0,
+                    // Para características, dividir la descripción en líneas si es larga
+                    features: apiProduct.descripcion ? 
+                        apiProduct.descripcion.split(/[\.;]/).filter(f => f.trim().length > 10).slice(0, 8).map(f => f.trim()) :
+                        []
+                };
+                console.log('✅ Producto cargado desde API:', product.name);
+            } else {
+                console.warn('⚠️ No se pudo cargar desde API, usando datos de respaldo');
+            }
+        } catch (error) {
+            console.error('❌ Error al cargar desde API:', error);
+        }
+    }
+    
+    // Si no se cargó desde la API, usar datos de respaldo
+    if (!product) {
+        product = productsData[productId];
+        console.log('🎯 Producto encontrado en datos de respaldo:', product ? product.name : 'NO ENCONTRADO');
+    }
     
     if (!product) {
-        console.error('❌ Producto no encontrado. IDs disponibles:', Object.keys(productsData));
-        alert('❌ Producto no encontrado. ID buscado: ' + productId);
+        console.error('❌ Producto no encontrado. ID buscado:', productId);
+        alert('❌ Producto no encontrado. Redirigiendo al inicio...');
         window.location.href = 'index.html';
         return;
     }
+    
+    // Guardar producto actual globalmente
+    currentProduct = product;
     
     console.log('✅ Actualizando página con datos del producto...');
     
@@ -223,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Actualizar imagen
     const productImage = document.getElementById('productImage');
-    if (productImage) productImage.textContent = product.icon;
+    if (productImage) productImage.textContent = product.icon || '📦';
     
     // Actualizar título
     const productTitle = document.getElementById('productTitle');
@@ -233,49 +277,85 @@ document.addEventListener('DOMContentLoaded', function() {
     const productPrice = document.getElementById('productPrice');
     if (productPrice) productPrice.textContent = formatPrice(product.price);
     
-    if (product.oldPrice) {
-        const priceInfo = document.getElementById('priceInfo');
-        if (priceInfo) {
+    const priceInfo = document.getElementById('priceInfo');
+    if (priceInfo) {
+        if (product.oldPrice && product.oldPrice > product.price) {
             priceInfo.innerHTML = `
                 <span class="old-price">${formatPrice(product.oldPrice)}</span>
                 <span class="savings">Ahorras ${formatPrice(product.oldPrice - product.price)} (-${product.discount}%)</span>
             `;
+        } else {
+            priceInfo.innerHTML = '';
         }
     }
     
     // Actualizar descripción
     const productDescription = document.getElementById('productDescription');
-    if (productDescription) productDescription.textContent = product.description;
+    if (productDescription) productDescription.textContent = product.description || 'Sin descripción disponible.';
     
     // Actualizar características
     const featuresList = document.getElementById('featuresList');
     if (featuresList) {
-        featuresList.innerHTML = product.features.map(feature => `<li>${feature}</li>`).join('');
+        if (product.features && product.features.length > 0) {
+            featuresList.innerHTML = product.features.map(feature => `<li>${feature}</li>`).join('');
+        } else {
+            featuresList.innerHTML = '<li>Características no disponibles</li>';
+        }
     }
     
     // Actualizar metadatos
     const productCategory = document.getElementById('productCategory');
-    if (productCategory) productCategory.textContent = product.category;
+    if (productCategory) productCategory.textContent = product.categoryName || product.category || '-';
     
     const productBrand = document.getElementById('productBrand');
-    if (productBrand) productBrand.textContent = product.brand;
+    if (productBrand) productBrand.textContent = product.brand || '-';
     
     const productSku = document.getElementById('productSku');
-    if (productSku) productSku.textContent = product.sku;
+    if (productSku) productSku.textContent = product.sku || `PROD-${product.id}`;
     
     // Cargar productos relacionados
-    loadRelatedProducts(product.category, product.id);
+    if (product.category) {
+        loadRelatedProducts(product.category, product.id);
+    }
     
     console.log('✅ Página de producto cargada exitosamente');
 });
 
 // Cargar productos relacionados
-function loadRelatedProducts(category, currentId) {
+async function loadRelatedProducts(category, currentId) {
     console.log('🔗 Cargando productos relacionados de categoría:', category);
     
-    const related = Object.values(productsData)
-        .filter(p => p.category === category && p.id !== currentId)
-        .slice(0, 4);
+    let related = [];
+    
+    // Intentar cargar desde la API
+    if (typeof DB !== 'undefined' && DB.getProducts) {
+        try {
+            const response = await DB.getProducts(category);
+            if (response && response.ok && response.data) {
+                related = response.data
+                    .filter(p => p.id !== currentId)
+                    .slice(0, 4)
+                    .map(p => ({
+                        id: p.id,
+                        name: p.nombre,
+                        price: parseFloat(p.precio),
+                        oldPrice: p.precio_anterior ? parseFloat(p.precio_anterior) : null,
+                        discount: p.descuento || 0,
+                        icon: p.icono || '📦',
+                        category: p.categoria_slug || ''
+                    }));
+            }
+        } catch (error) {
+            console.error('Error al cargar productos relacionados desde API:', error);
+        }
+    }
+    
+    // Si no hay productos desde la API, usar datos de respaldo
+    if (related.length === 0) {
+        related = Object.values(productsData)
+            .filter(p => p.category === category && p.id !== currentId)
+            .slice(0, 4);
+    }
     
     console.log('📋 Productos relacionados encontrados:', related.length);
     
@@ -293,7 +373,7 @@ function loadRelatedProducts(category, currentId) {
     
     container.innerHTML = related.map(product => `
         <div class="product-card" onclick="viewProductDetail(${product.id})">
-            <div class="product-image">${product.icon}</div>
+            <div class="product-image">${product.icon || '📦'}</div>
             <div class="product-info">
                 <h3 class="product-title">${product.name}</h3>
                 <div class="product-price">
@@ -315,16 +395,16 @@ function viewProductDetail(productId) {
 
 // Contactar vendedor
 function contactSeller() {
-    const productId = parseInt(localStorage.getItem('selectedProduct'));
-    const product = productsData[productId];
+    const product = currentProduct || productsData[parseInt(localStorage.getItem('selectedProduct'))];
     
     if (!product) {
         alert('Error al obtener información del producto');
         return;
     }
     
-    const message = `Hola, estoy interesado en el producto: ${product.name} (SKU: ${product.sku})`;
-    const whatsappUrl = `https://wa.me/573001234567?text=${encodeURIComponent(message)}`;
+    const sku = product.sku || `PROD-${product.id}`;
+    const message = `Hola, estoy interesado en el producto: ${product.name} (SKU: ${sku})`;
+    const whatsappUrl = `https://wa.me/573185838072?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
 }
 

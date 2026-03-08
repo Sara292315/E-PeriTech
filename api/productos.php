@@ -43,7 +43,7 @@ try {
             $id = (int)($_GET['id'] ?? 0);
             if (!$id) responder(false, null, 'ID requerido.', 400);
             $stmt = $pdo->prepare("
-                SELECT p.*, c.slug AS categoria_slug, c.nombre AS categoria_nombre
+                SELECT p.*, p.precio_viejo AS precio_anterior, c.slug AS categoria_slug, c.nombre AS categoria_nombre
                 FROM productos p
                 LEFT JOIN categorias c ON c.id = p.categoria_id
                 WHERE p.id = ?
@@ -58,26 +58,40 @@ try {
             foreach (['nombre','precio','categoria_id'] as $c) {
                 if (empty($d[$c])) responder(false, null, "Campo '$c' requerido.", 400);
             }
-            $stmt = $pdo->prepare("
-                INSERT INTO productos (nombre, descripcion, precio, precio_anterior, descuento, icono, categoria_id, proveedor_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ");
-            $precio    = (float)$d['precio'];
-            $precioAnt = isset($d['precio_anterior']) ? (float)$d['precio_anterior'] : null;
+            
+            // Manejar tanto precio_anterior como precio_viejo para compatibilidad
+            $precioAnt = null;
+            if (isset($d['precio_anterior']) && $d['precio_anterior'] !== null && $d['precio_anterior'] !== '') {
+                $precioAnt = (float)$d['precio_anterior'];
+            } elseif (isset($d['precio_viejo']) && $d['precio_viejo'] !== null && $d['precio_viejo'] !== '') {
+                $precioAnt = (float)$d['precio_viejo'];
+            }
+            
+            $precio = (float)$d['precio'];
             $descuento = ($precioAnt && $precioAnt > 0)
                 ? round((1 - $precio / $precioAnt) * 100)
                 : 0;
-            $stmt->execute([
-                trim($d['nombre']),
-                $d['descripcion'] ?? null,
-                $precio,
-                $precioAnt,
-                $descuento,
-                $d['icono'] ?? '📦',
-                (int)$d['categoria_id'],
-                $d['proveedor_id'] ?? null,
-            ]);
-            responder(true, ['id' => (int)$pdo->lastInsertId()], 'Producto creado.');
+            
+            $stmt = $pdo->prepare("
+                INSERT INTO productos (nombre, descripcion, precio, precio_viejo, descuento, icono, categoria_id, proveedor_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+            
+            try {
+                $stmt->execute([
+                    trim($d['nombre']),
+                    $d['descripcion'] ?? null,
+                    $precio,
+                    $precioAnt,
+                    $descuento,
+                    $d['icono'] ?? '📦',
+                    (int)$d['categoria_id'],
+                    $d['proveedor_id'] ?? null,
+                ]);
+                responder(true, ['id' => (int)$pdo->lastInsertId()], 'Producto creado.');
+            } catch (PDOException $e) {
+                responder(false, null, 'Error al crear producto: ' . $e->getMessage(), 500);
+            }
 
         case 'actualizar':
             $id = (int)($_GET['id'] ?? 0);
@@ -86,21 +100,42 @@ try {
 
             $campos = [];
             $params = [];
-            $map = ['nombre','descripcion','precio','precio_anterior','icono','categoria_id','proveedor_id','activo'];
+            $map = ['nombre','descripcion','precio','icono','categoria_id','proveedor_id','activo'];
             foreach ($map as $f) {
                 if (array_key_exists($f, $d)) {
                     $campos[] = "$f = ?";
                     $params[] = $d[$f];
                 }
             }
-            if (isset($d['precio']) && isset($d['precio_anterior']) && $d['precio_anterior'] > 0) {
-                $campos[] = "descuento = ?";
-                $params[] = round((1 - $d['precio'] / $d['precio_anterior']) * 100);
+            
+            // Manejar precio_viejo (nombre correcto en la BD)
+            $precioAnt = null;
+            if (isset($d['precio_anterior']) && $d['precio_anterior'] !== null && $d['precio_anterior'] !== '') {
+                $precioAnt = (float)$d['precio_anterior'];
+            } elseif (isset($d['precio_viejo']) && $d['precio_viejo'] !== null && $d['precio_viejo'] !== '') {
+                $precioAnt = (float)$d['precio_viejo'];
             }
+            
+            if ($precioAnt !== null) {
+                $campos[] = "precio_viejo = ?";
+                $params[] = $precioAnt;
+                
+                // Calcular descuento si hay precio anterior
+                if (isset($d['precio']) && $precioAnt > 0) {
+                    $campos[] = "descuento = ?";
+                    $params[] = round((1 - (float)$d['precio'] / $precioAnt) * 100);
+                }
+            }
+            
             if (empty($campos)) responder(false, null, 'Nada que actualizar.', 400);
             $params[] = $id;
-            $pdo->prepare("UPDATE productos SET " . implode(', ', $campos) . " WHERE id = ?")->execute($params);
-            responder(true, null, 'Producto actualizado.');
+            
+            try {
+                $pdo->prepare("UPDATE productos SET " . implode(', ', $campos) . " WHERE id = ?")->execute($params);
+                responder(true, null, 'Producto actualizado.');
+            } catch (PDOException $e) {
+                responder(false, null, 'Error al actualizar producto: ' . $e->getMessage(), 500);
+            }
 
         case 'eliminar':
             $id = (int)($_GET['id'] ?? 0);

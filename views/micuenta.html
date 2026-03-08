@@ -193,13 +193,29 @@
         // proveedores van a su panel
         if(session.role === 'proveedor') window.location.href = 'proveedor.html';
     }
-    let user = DB.getUserById(session.userId);
+    let user = null;
+    
+    // Cargar datos del usuario
+    (async function() {
+        if (session && session.userId) {
+            const res = await DB.getUsuario(session.userId);
+            if (res && res.ok && res.data) {
+                user = res.data;
+                loadHeader();
+                renderOverview();
+            }
+        }
+    })();
 
     function loadHeader() {
+        if (!user) return;
         document.getElementById('userAvatar').textContent  = user.avatar || '👤';
-        document.getElementById('userName').textContent    = user.nombre + ' ' + user.apellido;
-        document.getElementById('userEmail').textContent   = user.email;
-        document.getElementById('memberSince').textContent = new Date(user.createdAt).toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+        document.getElementById('userName').textContent    = (user.nombre || '') + ' ' + (user.apellido || '');
+        document.getElementById('userEmail').textContent   = user.email || '';
+        if (user.created_at || user.createdAt) {
+            const fecha = user.created_at || user.createdAt;
+            document.getElementById('memberSince').textContent = new Date(fecha).toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+        }
     }
 
     function switchPanel(name, btn) {
@@ -216,9 +232,10 @@
     function fmtMoney(n){ return '$'+Number(n).toLocaleString('es-CO'); }
     function badge(text,cls){ return `<span class="badge badge-${cls}">${text}</span>`; }
 
-    function renderOverview() {
-        const orders = DB.getOrdersByUser(session.userId);
-        const total  = orders.reduce((s,o)=>s+o.total,0);
+    async function renderOverview() {
+        const res = await DB.getOrders(session.userId);
+        const orders = (res && res.ok && res.data) ? res.data : [];
+        const total  = orders.reduce((s,o)=>s+parseFloat(o.total||0),0);
         document.getElementById('overviewStats').innerHTML = `
             <div class="mini-stat"><div class="mini-stat-val">${orders.length}</div><div class="mini-stat-lbl">Órdenes</div></div>
             <div class="mini-stat"><div class="mini-stat-val">${orders.filter(o=>o.estado==='pendiente').length}</div><div class="mini-stat-lbl">Pendientes</div></div>
@@ -228,50 +245,67 @@
         document.getElementById('recentOrders').innerHTML = last3.length
             ? last3.map(o=>`<tr>
                 <td><code style="font-size:11px;">${o.id}</code></td>
-                <td>${o.productos.map(p=>p.nombre).join(', ')}</td>
+                <td>${(o.items||[]).map(p=>p.producto_nombre||p.nombre_snap||'Producto').join(', ')}</td>
                 <td>${fmtMoney(o.total)}</td>
                 <td>${badge(o.estado,o.estado)}</td>
                 <td>${fmtDate(o.fecha)}</td></tr>`).join('')
             : '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📭</div><h4>Sin órdenes aún</h4><p>Explora los productos de la tienda</p></div></td></tr>';
     }
 
-    function renderAllOrders() {
-        const orders = DB.getOrdersByUser(session.userId).slice().reverse();
+    async function renderAllOrders() {
+        const res = await DB.getOrders(session.userId);
+        const orders = (res && res.ok && res.data) ? res.data.slice().reverse() : [];
         const el = document.getElementById('allOrders');
         if (!el) return;
         el.innerHTML = orders.length
             ? orders.map(o=>`<tr>
                 <td><code style="font-size:11px;">${o.id}</code></td>
-                <td>${o.productos.map(p=>`<div style="font-size:13px;"><strong>${p.nombre}</strong> ×${p.cantidad||1} <span style="color:#888;font-size:11px;">${fmtMoney(p.precio)}</span></div>`).join('')}</td>
+                <td>${(o.items||[]).map(p=>`<div style="font-size:13px;"><strong>${p.producto_nombre||p.nombre_snap||'Producto'}</strong> ×${p.cantidad||1} <span style="color:#888;font-size:11px;">${fmtMoney(p.precio_snap||p.precio_unitario||0)}</span></div>`).join('')}</td>
                 <td><strong>${fmtMoney(o.total)}</strong></td>
                 <td>${badge(o.estado,o.estado)}</td>
                 <td>${fmtDate(o.fecha)}</td></tr>`).join('')
             : '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📭</div><h4>Sin órdenes</h4></div></td></tr>';
     }
 
-    function loadPerfilForm() {
-        const u = DB.getUserById(session.userId);
-        document.getElementById('pNombre').value    = u.nombre    || '';
-        document.getElementById('pApellido').value  = u.apellido  || '';
-        document.getElementById('pTelefono').value  = u.telefono  || '';
-        document.getElementById('pDireccion').value = u.direccion || '';
+    async function loadPerfilForm() {
+        if (!user) {
+            const res = await DB.getUsuario(session.userId);
+            if (res && res.ok && res.data) user = res.data;
+        }
+        if (user) {
+            document.getElementById('pNombre').value    = user.nombre    || '';
+            document.getElementById('pApellido').value  = user.apellido  || '';
+            document.getElementById('pTelefono').value  = user.telefono  || '';
+            document.getElementById('pDireccion').value = user.direccion || '';
+        }
     }
 
-    function savePerfil() {
+    async function savePerfil() {
         const changes = {
             nombre:    document.getElementById('pNombre').value.trim(),
             apellido:  document.getElementById('pApellido').value.trim(),
             telefono:  document.getElementById('pTelefono').value.trim(),
             direccion: document.getElementById('pDireccion').value.trim(),
         };
-        const res = DB.updateUser(session.userId, changes);
+        const res = await DB.actualizarUsuario(session.userId, changes);
         const msg = document.getElementById('perfilMsg');
-        if(res.ok){ msg.textContent='✅ Perfil actualizado.'; msg.className='msg success'; user=res.user; loadHeader(); }
-        else       { msg.textContent=res.msg; msg.className='msg error'; }
+        if(res && res.ok){
+            msg.textContent='✅ Perfil actualizado.';
+            msg.className='msg success';
+            // Recargar datos del usuario
+            const userRes = await DB.getUsuario(session.userId);
+            if (userRes && userRes.ok && userRes.data) {
+                user = userRes.data;
+                loadHeader();
+            }
+        } else {
+            msg.textContent=res?.msg || 'Error al actualizar perfil';
+            msg.className='msg error';
+        }
         setTimeout(()=>{ msg.className='msg'; },3000);
     }
 
-    function changePassword() {
+    async function changePassword() {
         const actual   = document.getElementById('passActual').value;
         const nueva    = document.getElementById('passNueva').value;
         const confirm  = document.getElementById('passConfirm').value;
@@ -279,14 +313,21 @@
         if(!actual || !nueva) return showPassMsg('Completa todos los campos.','error');
         if(nueva.length < 8)  return showPassMsg('Mínimo 8 caracteres.','error');
         if(nueva !== confirm)  return showPassMsg('Las contraseñas no coinciden.','error');
-        // verify current
-        const u = DB.getUserById(session.userId);
-        if(u.password !== DB._hash(actual)) return showPassMsg('Contraseña actual incorrecta.','error');
-        DB.updateUser(session.userId,{password: nueva});
-        showPassMsg('✅ Contraseña actualizada.','success');
-        document.getElementById('passActual').value = '';
-        document.getElementById('passNueva').value  = '';
-        document.getElementById('passConfirm').value= '';
+        
+        // Actualizar contraseña (la validación se hace en el backend)
+        const res = await DB.actualizarUsuario(session.userId, {
+            password_actual: actual,
+            password: nueva
+        });
+        
+        if(res && res.ok){
+            showPassMsg('✅ Contraseña actualizada.','success');
+            document.getElementById('passActual').value = '';
+            document.getElementById('passNueva').value  = '';
+            document.getElementById('passConfirm').value= '';
+        } else {
+            showPassMsg(res?.msg || 'Error al actualizar contraseña. Verifica tu contraseña actual.','error');
+        }
     }
 
     function showPassMsg(text,type){
@@ -295,12 +336,12 @@
         setTimeout(()=>{ msg.className='msg'; },3000);
     }
 
-    function doLogout(){ DB.logout(); window.location.href='index.html'; }
+    async function doLogout(){
+        await DB.logout();
+        window.location.href='index.html';
+    }
     function toggleMenu(){ document.getElementById('navLinks').classList.toggle('active'); }
     function toggleSearch(){ window.location.href='index.html'; }
-
-    loadHeader();
-    renderOverview();
 </script>
     <script src="../app/cart.js"></script>
 </body>

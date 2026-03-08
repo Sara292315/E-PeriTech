@@ -97,12 +97,10 @@
             🖥️ E-PeriTech
             <div class="sidebar-role">Proveedor</div>
         </div>
-        <nav class="sidebar-nav">
             <div class="nav-item active" onclick="showPage('inicio')">📊 Resumen</div>
             <div class="nav-item" onclick="showPage('catalogo')">📦 Catálogo</div>
             <div class="nav-item" onclick="showPage('ordenes')">🧾 Órdenes</div>
             <div class="nav-item" onclick="showPage('perfil')">👤 Mi Perfil</div>
-        </nav>
         <div class="sidebar-bottom">
             <div style="font-size:14px;opacity:.7;margin-bottom:10px;" id="sidebarUser"></div>
             <div class="nav-item" style="padding:10px 0;color:#f87171;cursor:pointer;" onclick="doLogout()">🚪 Salir</div>
@@ -238,8 +236,19 @@
 <script>
     DB.requireRole('proveedor','login.html');
     const session = DB.getSession();
-    const user    = DB.getUserById(session.userId);
-    document.getElementById('sidebarUser').textContent = '🏭 ' + user.nombre;
+    let user = null;
+    
+    // Cargar datos del usuario
+    (async function() {
+        if (session && session.userId) {
+            const res = await DB.getUsuario(session.userId);
+            if (res && res.ok && res.data) {
+                user = res.data;
+                document.getElementById('sidebarUser').textContent = '🏭 ' + (user.nombre || 'Usuario');
+                renderInicio();
+            }
+        }
+    })();
 
     // showPage se define más abajo con soporte para catálogo
 
@@ -247,12 +256,20 @@
     function fmtMoney(n){ return '$'+Number(n).toLocaleString('es-CO'); }
     function badge(text,cls){ return `<span class="badge badge-${cls}">${text}</span>`; }
 
-    function renderInicio() {
+    async function renderInicio() {
+        if (!user) {
+            const res = await DB.getUsuario(session.userId);
+            if (res && res.ok && res.data) user = res.data;
+        }
+        if (!user) return;
+        
         document.getElementById('welcomeSub').textContent = 'Empresa: ' + (user.empresa||user.nombre);
         const banner = document.getElementById('verifyBanner');
         banner.style.display = user.verificado ? 'none' : 'block';
 
-        const orders = DB.getOrders();
+        const ordersRes = await DB.getOrders();
+        const orders = (ordersRes && ordersRes.ok && ordersRes.data) ? ordersRes.data : [];
+        
         document.getElementById('provStats').innerHTML = `
             <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-value">${orders.length}</div><div class="stat-label">Órdenes totales</div></div>
             <div class="stat-card"><div class="stat-icon">⏳</div><div class="stat-value">${orders.filter(o=>o.estado==='pendiente').length}</div><div class="stat-label">Pendientes</div></div>
@@ -261,24 +278,41 @@
         `;
 
         const last5 = orders.slice(-5).reverse();
-        document.getElementById('provOrders').innerHTML = last5.map(o=>`
+        document.getElementById('provOrders').innerHTML = last5.map(o=>{
+            const items = o.items || [];
+            return `
             <tr>
                 <td><code style="font-size:11px;">${o.id}</code></td>
-                <td>${o.productos.map(p=>p.nombre).join(', ')}</td>
+                <td>${items.map(p=>p.producto_nombre||p.nombre_snap||'Producto').join(', ')}</td>
                 <td>${fmtMoney(o.total)}</td>
                 <td>${badge(o.estado,o.estado)}</td>
                 <td>${fmtDate(o.fecha)}</td>
-            </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;color:#aaa;">Sin órdenes</td></tr>';
+            </tr>`;
+        }).join('') || '<tr><td colspan="5" style="text-align:center;color:#aaa;">Sin órdenes</td></tr>';
     }
 
-    function renderOrdenesProv() {
-        const orders = DB.getOrders().slice().reverse();
+    async function renderOrdenesProv() {
+        const ordersRes = await DB.getOrders();
+        const orders = (ordersRes && ordersRes.ok && ordersRes.data) ? ordersRes.data.slice().reverse() : [];
+        
+        // Cargar información de compradores
+        const compradoresMap = {};
+        for (const order of orders) {
+            if (order.comprador_id && !compradoresMap[order.comprador_id]) {
+                const userRes = await DB.getUsuario(order.comprador_id);
+                if (userRes && userRes.ok && userRes.data) {
+                    compradoresMap[order.comprador_id] = userRes.data;
+                }
+            }
+        }
+        
         document.getElementById('tablaOrdenesProv').innerHTML = orders.map(o=>{
-            const u = DB.getUserById(o.compradorId);
+            const u = compradoresMap[o.comprador_id];
+            const items = o.items || [];
             return `<tr>
                 <td><code style="font-size:11px;">${o.id}</code></td>
-                <td>${u?u.nombre+' '+u.apellido:o.compradorId}</td>
-                <td>${o.productos.map(p=>p.nombre).join(', ')}</td>
+                <td>${u ? u.nombre + ' ' + u.apellido : o.comprador_id}</td>
+                <td>${items.map(p=>p.producto_nombre||p.nombre_snap||'Producto').join(', ')}</td>
                 <td>${fmtMoney(o.total)}</td>
                 <td>${badge(o.estado,o.estado)}</td>
                 <td>${fmtDate(o.fecha)}</td>
@@ -286,17 +320,22 @@
         }).join('') || '<tr><td colspan="6" style="text-align:center;color:#aaa;">Sin órdenes</td></tr>';
     }
 
-    function loadPerfil() {
-        const u = DB.getUserById(session.userId);
-        document.getElementById('pNombre').value   = u.nombre   || '';
-        document.getElementById('pApellido').value = u.apellido || '';
-        document.getElementById('pTelefono').value = u.telefono || '';
-        document.getElementById('pEmpresa').value  = u.empresa  || '';
-        document.getElementById('pNit').value      = u.nit      || '';
-        document.getElementById('pDir').value      = u.direccion|| '';
+    async function loadPerfil() {
+        if (!user) {
+            const res = await DB.getUsuario(session.userId);
+            if (res && res.ok && res.data) user = res.data;
+        }
+        if (user) {
+            document.getElementById('pNombre').value   = user.nombre   || '';
+            document.getElementById('pApellido').value = user.apellido || '';
+            document.getElementById('pTelefono').value = user.telefono || '';
+            document.getElementById('pEmpresa').value  = user.empresa  || '';
+            document.getElementById('pNit').value      = user.nit      || '';
+            document.getElementById('pDir').value      = user.direccion|| '';
+        }
     }
 
-    function saveProfile(e) {
+    async function saveProfile(e) {
         e.preventDefault();
         const changes = {
             nombre:    document.getElementById('pNombre').value.trim(),
@@ -308,10 +347,20 @@
         };
         const pass = document.getElementById('pPass').value;
         if(pass) changes.password = pass;
-        const res = DB.updateUser(session.userId, changes);
+        const res = await DB.actualizarUsuario(session.userId, changes);
         const msg = document.getElementById('perfilMsg');
-        if(res.ok){ msg.textContent='✅ Perfil actualizado.'; msg.className='msg success'; }
-        else      { msg.textContent=res.msg;                  msg.className='msg error'; }
+        if(res && res.ok){
+            msg.textContent='✅ Perfil actualizado.';
+            msg.className='msg success';
+            // Recargar datos del usuario
+            const userRes = await DB.getUsuario(session.userId);
+            if (userRes && userRes.ok && userRes.data) {
+                user = userRes.data;
+            }
+        } else {
+            msg.textContent=res?.msg || 'Error al actualizar perfil';
+            msg.className='msg error';
+        }
         setTimeout(()=>{ msg.className='msg'; }, 3000);
     }
 
@@ -327,8 +376,27 @@
         renderCatalog();
     }
 
-    function renderCatalog() {
-        const all = DB.getProducts().filter(p => p.activo !== false);
+    async function renderCatalog() {
+        const productsRes = await DB.getProducts();
+        const allProducts = (productsRes && productsRes.ok && productsRes.data) ? productsRes.data : [];
+        
+        // Mapear productos de la API a formato esperado
+        const all = allProducts
+            .filter(p => p.activo !== 0)
+            .map(p => ({
+                id: p.id,
+                name: p.nombre,
+                price: parseFloat(p.precio),
+                oldPrice: p.precio_anterior ? parseFloat(p.precio_anterior) : null,
+                discount: p.descuento || 0,
+                icon: p.icono || '📦',
+                category: p.categoria_slug || '',
+                categoryName: p.categoria_nombre || '',
+                description: p.descripcion || '',
+                proveedorId: p.proveedor_id,
+                activo: p.activo !== 0
+            }));
+        
         const list = currentTab === 'mios'
             ? all.filter(p => p.proveedorId === session.userId)
             : all;
@@ -363,13 +431,26 @@
         }).join('');
     }
 
-    function openModal(productId) {
+    async function openModal(productId) {
         const modal = document.getElementById('productModal');
         document.getElementById('modalMsg').className = 'msg';
         document.getElementById('mId').value = '';
 
         if (productId) {
-            const p = DB.getProducts().find(x => x.id === productId);
+            const productsRes = await DB.getProducts();
+            const allProducts = (productsRes && productsRes.ok && productsRes.data) ? productsRes.data : [];
+            const mappedProducts = allProducts.map(p => ({
+                id: p.id,
+                name: p.nombre,
+                price: parseFloat(p.precio),
+                oldPrice: p.precio_anterior ? parseFloat(p.precio_anterior) : null,
+                discount: p.descuento || 0,
+                icon: p.icono || '📦',
+                category: p.categoria_slug || '',
+                description: p.descripcion || '',
+                proveedorId: p.proveedor_id
+            }));
+            const p = mappedProducts.find(x => x.id === productId);
             if (!p || p.proveedorId !== session.userId) return;
             document.getElementById('modalTitle').textContent = '✏️ Editar Producto';
             document.getElementById('mId').value       = p.id;
@@ -396,7 +477,7 @@
         document.getElementById('productModal').style.display = 'none';
     }
 
-    function saveProduct() {
+    async function saveProduct() {
         const id       = document.getElementById('mId').value;
         const name     = document.getElementById('mName').value.trim();
         const category = document.getElementById('mCategory').value;
@@ -410,30 +491,60 @@
         if (!price || Number(price) <= 0) return showModalMsg('Ingresa un precio válido.', 'error');
         if (oldPrice && Number(oldPrice) <= Number(price)) return showModalMsg('El precio anterior debe ser mayor al actual.', 'error');
 
-        const data = { name, category, icon, price, oldPrice, description: desc };
+        // Obtener categoria_id desde el slug
+        const categoryMap = {
+            'mouse': 1,
+            'teclado': 2,
+            'monitor': 3,
+            'audifonos': 4,
+            'otros': 5
+        };
+        
+        const data = {
+            nombre: name,
+            categoria_id: categoryMap[category] || 5,
+            icono: icon || '📦',
+            precio: parseFloat(price),
+            precio_anterior: oldPrice ? parseFloat(oldPrice) : null,
+            descripcion: desc,
+            proveedor_id: session.userId
+        };
+        
         let result;
 
         if (id) {
-            result = DB.updateProduct(Number(id), data);
+            result = await DB.updateProduct(Number(id), data);
         } else {
-            result = DB.createProduct(data, session.userId);
+            result = await DB.createProduct(data);
         }
 
-        if (result.ok) {
+        if (result && result.ok) {
             showModalMsg('✅ Producto guardado correctamente.', 'success');
             setTimeout(() => { closeModal(); renderCatalog(); }, 900);
         } else {
-            showModalMsg(result.msg || 'Error al guardar.', 'error');
+            showModalMsg(result?.msg || 'Error al guardar.', 'error');
         }
     }
 
-    function deleteProduct(productId) {
-        const p = DB.getProducts().find(x => x.id === productId);
+    async function deleteProduct(productId) {
+        const productsRes = await DB.getProducts();
+        const allProducts = (productsRes && productsRes.ok && productsRes.data) ? productsRes.data : [];
+        const mappedProducts = allProducts.map(p => ({
+            id: p.id,
+            name: p.nombre,
+            proveedorId: p.proveedor_id
+        }));
+        const p = mappedProducts.find(x => x.id === productId);
         if (!p || p.proveedorId !== session.userId) return;
         if (!confirm(`¿Eliminar "${p.name}"? Esta acción no se puede deshacer.`)) return;
-        DB.deleteProduct(productId);
-        renderCatalog();
-        showCatalogMsg('🗑️ Producto eliminado.', 'success');
+        
+        const result = await DB.deleteProduct(productId);
+        if (result && result.ok) {
+            await renderCatalog();
+            showCatalogMsg('🗑️ Producto eliminado.', 'success');
+        } else {
+            showCatalogMsg(result?.msg || 'Error al eliminar producto.', 'error');
+        }
     }
 
     function showModalMsg(text, type) {
@@ -460,14 +571,12 @@
         document.querySelectorAll('.page-panel').forEach(p=>p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
         document.getElementById('page-'+name).classList.add('active');
-        event.currentTarget.classList.add('active');
+        if(event && event.currentTarget) event.currentTarget.classList.add('active');
         if(name==='inicio')   renderInicio();
         if(name==='ordenes')  renderOrdenesProv();
         if(name==='perfil')   loadPerfil();
         if(name==='catalogo') renderCatalog();
     }
-
-    renderInicio();
 </script>
 </body>
 </html>

@@ -65,23 +65,60 @@ try {
             if (empty($d['comprador_id']) || empty($d['items'])) {
                 responder(false, null, 'comprador_id e items son requeridos.', 400);
             }
+            
             $pdo->beginTransaction();
-            $total = array_sum(array_map(fn($i) => $i['precio'] * $i['cantidad'], $d['items']));
-            $stmt = $pdo->prepare("
-                INSERT INTO ordenes (comprador_id, total, estado) VALUES (?, ?, 'pendiente')
-            ");
-            $stmt->execute([$d['comprador_id'], $total]);
-            $ordenId = (int)$pdo->lastInsertId();
-
-            $s2 = $pdo->prepare("
-                INSERT INTO orden_items (orden_id, producto_id, cantidad, precio_unitario)
-                VALUES (?, ?, ?, ?)
-            ");
-            foreach ($d['items'] as $item) {
-                $s2->execute([$ordenId, (int)$item['producto_id'], (int)$item['cantidad'], (float)$item['precio']]);
+            try {
+                // Calcular total
+                $total = 0;
+                foreach ($d['items'] as $item) {
+                    $precio = isset($item['precio']) ? (float)$item['precio'] : (float)$item['price'];
+                    $cantidad = isset($item['cantidad']) ? (int)$item['cantidad'] : 1;
+                    $total += $precio * $cantidad;
+                }
+                
+                // Generar ID de orden (ORD-{timestamp})
+                $ordenId = 'ORD-' . time() . '-' . rand(100, 999);
+                
+                // Insertar orden
+                $stmt = $pdo->prepare("
+                    INSERT INTO ordenes (id, comprador_id, total, estado) 
+                    VALUES (?, ?, ?, 'pendiente')
+                ");
+                $stmt->execute([$ordenId, $d['comprador_id'], $total]);
+                
+                // Insertar items de la orden
+                $s2 = $pdo->prepare("
+                    INSERT INTO orden_items (orden_id, producto_id, nombre_snap, precio_snap, cantidad)
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+                
+                foreach ($d['items'] as $item) {
+                    // Manejar diferentes nombres de campos
+                    $productoId = isset($item['producto_id']) ? (int)$item['producto_id'] : 
+                                 (isset($item['productoId']) ? (int)$item['productoId'] : 
+                                 (isset($item['id']) ? (int)$item['id'] : 0));
+                    
+                    $nombre = isset($item['nombre']) ? $item['nombre'] : 
+                             (isset($item['name']) ? $item['name'] : 'Producto');
+                    
+                    $precio = isset($item['precio']) ? (float)$item['precio'] : 
+                             (isset($item['price']) ? (float)$item['price'] : 0);
+                    
+                    $cantidad = isset($item['cantidad']) ? (int)$item['cantidad'] : 1;
+                    
+                    if ($productoId > 0 && $precio > 0) {
+                        $s2->execute([$ordenId, $productoId, $nombre, $precio, $cantidad]);
+                    } else {
+                        throw new Exception("Item inválido: producto_id={$productoId}, precio={$precio}");
+                    }
+                }
+                
+                $pdo->commit();
+                responder(true, ['id' => $ordenId], 'Orden creada.');
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                throw $e;
             }
-            $pdo->commit();
-            responder(true, ['id' => $ordenId], 'Orden creada.');
 
         case 'estado':
             $id     = (int)($_GET['id'] ?? 0);

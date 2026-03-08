@@ -424,18 +424,60 @@
         </div>
     </footer>
 
+    <script src="../app/database.js"></script>
     <script src="../app/script.js"></script>
     <script src="../app/product-detail.js"></script>
     <script src="../app/cart.js"></script>
     <script>
     // Agregar producto actual al carrito
-    function addCurrentToCart() {
-        const id   = parseInt(localStorage.getItem('selectedProduct'));
-        if (!id) return;
-        // products está definido en script.js
-        const product = (typeof products !== 'undefined') ? products.find(p => p.id === id) : null;
-        if (!product) { Cart.showToast('❌ Producto no encontrado'); return; }
-        Cart.addItem(product);
+    async function addCurrentToCart() {
+        const id = parseInt(localStorage.getItem('selectedProduct'));
+        if (!id) {
+            Cart.showToast('❌ No se seleccionó ningún producto');
+            return;
+        }
+        
+        // Primero intentar usar el producto cargado en product-detail.js
+        if (typeof currentProduct !== 'undefined' && currentProduct && currentProduct.id === id) {
+            Cart.addItem(currentProduct);
+            return;
+        }
+        
+        // Si no está disponible, intentar cargarlo desde la API
+        if (typeof DB !== 'undefined' && DB.getProduct) {
+            try {
+                const response = await DB.getProduct(id);
+                if (response && response.ok && response.data) {
+                    const apiProduct = response.data;
+                    const product = {
+                        id: apiProduct.id,
+                        name: apiProduct.nombre,
+                        price: parseFloat(apiProduct.precio),
+                        oldPrice: apiProduct.precio_anterior ? parseFloat(apiProduct.precio_anterior) : null,
+                        discount: apiProduct.descuento || 0,
+                        icon: apiProduct.icono || '📦',
+                        category: apiProduct.categoria_slug || '',
+                        categoryName: apiProduct.categoria_nombre || '',
+                        description: apiProduct.descripcion || ''
+                    };
+                    Cart.addItem(product);
+                    return;
+                }
+            } catch (error) {
+                console.error('Error al cargar producto:', error);
+            }
+        }
+        
+        // Si todo falla, buscar en el array products de script.js
+        if (typeof products !== 'undefined' && products.length > 0) {
+            const product = products.find(p => p.id === id);
+            if (product) {
+                Cart.addItem(product);
+                return;
+            }
+        }
+        
+        Cart.showToast('❌ Producto no encontrado');
     }
     </script>
 </body>
