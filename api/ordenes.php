@@ -44,8 +44,8 @@ try {
             responder(true, $ordenes);
 
         case 'obtener':
-            $id = (int)($_GET['id'] ?? 0);
-            if (!$id) responder(false, null, 'ID requerido.', 400);
+            $id = $_GET['id'] ?? '';
+            if (empty($id)) responder(false, null, 'ID requerido.', 400);
             $stmt = $pdo->prepare("SELECT * FROM ordenes WHERE id = ?");
             $stmt->execute([$id]);
             $orden = $stmt->fetch();
@@ -121,15 +121,22 @@ try {
             }
 
         case 'estado':
-            $id     = (int)($_GET['id'] ?? 0);
+            $id     = $_GET['id'] ?? '';
             $d      = bodyJson();
             $estado = $d['estado'] ?? '';
             $validos = ['pendiente','procesando','enviado','entregado','cancelado'];
-            if (!$id || !in_array($estado, $validos)) {
-                responder(false, null, 'ID o estado inválido.', 400);
+            
+            if (empty($id) || !in_array($estado, $validos)) {
+                responder(false, null, 'ID o estado inválido. ID: ' . $id . ', Estado: ' . $estado, 400);
             }
-            $pdo->prepare("UPDATE ordenes SET estado = ? WHERE id = ?")->execute([$estado, $id]);
-            responder(true, null, 'Estado actualizado.');
+            
+            try {
+                $stmt = $pdo->prepare("UPDATE ordenes SET estado = ? WHERE id = ?");
+                $stmt->execute([$estado, $id]);
+                responder(true, null, 'Estado actualizado.');
+            } catch (PDOException $e) {
+                responder(false, null, 'Error al actualizar estado: ' . $e->getMessage(), 500);
+            }
 
         default:
             responder(false, null, 'Acción no válida.', 400);

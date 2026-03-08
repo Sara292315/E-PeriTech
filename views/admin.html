@@ -404,7 +404,7 @@
         document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
         document.getElementById('page-' + name).classList.add('active');
-        event.currentTarget.classList.add('active');
+        if(event && event.currentTarget) event.currentTarget.classList.add('active');
         if (name === 'dashboard')   renderDashboard();
         if (name === 'usuarios')    renderCompradores();
         if (name === 'proveedores') renderProveedores();
@@ -422,8 +422,29 @@
     }
 
     // ── DASHBOARD
-    function renderDashboard() {
-        const s = DB.getStats();
+    async function renderDashboard() {
+        // Calcular estadísticas desde la API
+        const [usersRes, compradoresRes, proveedoresRes, ordersRes] = await Promise.all([
+            DB.listarUsuarios(),
+            DB.listarUsuarios('comprador'),
+            DB.listarUsuarios('proveedor'),
+            DB.getOrders()
+        ]);
+        
+        const allUsers = (usersRes && usersRes.ok && usersRes.data) ? usersRes.data : [];
+        const compradores = (compradoresRes && compradoresRes.ok && compradoresRes.data) ? compradoresRes.data : [];
+        const proveedores = (proveedoresRes && proveedoresRes.ok && proveedoresRes.data) ? proveedoresRes.data : [];
+        const orders = (ordersRes && ordersRes.ok && ordersRes.data) ? ordersRes.data : [];
+        
+        const s = {
+            totalUsuarios: allUsers.length,
+            totalCompradores: compradores.length,
+            totalProveedores: proveedores.length,
+            totalOrdenes: orders.length,
+            ordenesPendientes: orders.filter(o => o.estado === 'pendiente').length,
+            ingresoTotal: orders.reduce((sum, o) => sum + parseFloat(o.total || 0), 0)
+        };
+        
         const grid = document.getElementById('statsGrid');
         grid.innerHTML = `
             <div class="stat-card blue">
@@ -458,12 +479,23 @@
             </div>
         `;
 
-        const orders = DB.getOrders().slice(-5).reverse();
-        document.getElementById('dashOrders').innerHTML = orders.map(o => {
-            const u = DB.getUserById(o.compradorId);
+        // Cargar información de compradores para las últimas órdenes
+        const last5 = orders.slice(-5).reverse();
+        const compradoresMap = {};
+        for (const order of last5) {
+            if (order.comprador_id && !compradoresMap[order.comprador_id]) {
+                const userRes = await DB.getUsuario(order.comprador_id);
+                if (userRes && userRes.ok && userRes.data) {
+                    compradoresMap[order.comprador_id] = userRes.data;
+                }
+            }
+        }
+        
+        document.getElementById('dashOrders').innerHTML = last5.map(o => {
+            const u = compradoresMap[o.comprador_id];
             return `<tr>
                 <td><code style="font-size:12px;">${o.id}</code></td>
-                <td>${u ? u.nombre + ' ' + u.apellido : o.compradorId}</td>
+                <td>${u ? u.nombre + ' ' + u.apellido : o.comprador_id}</td>
                 <td>${fmtMoney(o.total)}</td>
                 <td>${badge(o.estado, o.estado)}</td>
                 <td>${fmtDate(o.fecha)}</td>
@@ -472,22 +504,24 @@
     }
 
     // ── COMPRADORES
-    function renderCompradores() {
+    async function renderCompradores() {
         const q = (document.getElementById('searchComprador')?.value || '').toLowerCase();
-        const users = DB.getUsersByRole('comprador').filter(u =>
-            !q || u.nombre.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+        const res = await DB.listarUsuarios('comprador');
+        const allUsers = (res && res.ok && res.data) ? res.data : [];
+        const users = allUsers.filter(u =>
+            !q || (u.nombre || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q)
         );
         document.getElementById('tablaCompradores').innerHTML = users.map(u => `
             <tr>
                 <td><code style="font-size:11px;">${u.id}</code></td>
-                <td>${u.nombre} ${u.apellido}</td>
-                <td>${u.email}</td>
+                <td>${u.nombre || ''} ${u.apellido || ''}</td>
+                <td>${u.email || ''}</td>
                 <td>${u.telefono || '—'}</td>
-                <td>${badge(u.activo ? 'Activo' : 'Inactivo', u.activo ? 'activo' : 'inactivo')}</td>
-                <td>${fmtDate(u.createdAt)}</td>
+                <td>${badge((u.activo !== 0 && u.activo !== false) ? 'Activo' : 'Inactivo', (u.activo !== 0 && u.activo !== false) ? 'activo' : 'inactivo')}</td>
+                <td>${fmtDate(u.created_at || u.createdAt || new Date().toISOString())}</td>
                 <td>
                     <button class="btn-sm btn-warning-sm" onclick="toggleActive('${u.id}')">
-                        ${u.activo ? '🔒 Desactivar' : '🔓 Activar'}
+                        ${(u.activo !== 0 && u.activo !== false) ? '🔒 Desactivar' : '🔓 Activar'}
                     </button>
                     <button class="btn-sm btn-danger-sm" onclick="deleteUser('${u.id}')">🗑️</button>
                 </td>
@@ -495,23 +529,25 @@
     }
 
     // ── PROVEEDORES
-    function renderProveedores() {
+    async function renderProveedores() {
         const q = (document.getElementById('searchProveedor')?.value || '').toLowerCase();
-        const users = DB.getUsersByRole('proveedor').filter(u =>
-            !q || (u.empresa||'').toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+        const res = await DB.listarUsuarios('proveedor');
+        const allUsers = (res && res.ok && res.data) ? res.data : [];
+        const users = allUsers.filter(u =>
+            !q || (u.empresa||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q)
         );
         document.getElementById('tablaProveedores').innerHTML = users.map(u => `
             <tr>
                 <td><code style="font-size:11px;">${u.id}</code></td>
                 <td>${u.empresa || '—'}</td>
-                <td>${u.nombre} ${u.apellido}<br><small style="color:#aaa;">${u.email}</small></td>
+                <td>${u.nombre || ''} ${u.apellido || ''}<br><small style="color:#aaa;">${u.email || ''}</small></td>
                 <td>${u.nit || '—'}</td>
-                <td>${badge(u.activo ? 'Activo' : 'Inactivo', u.activo ? 'activo' : 'inactivo')}</td>
-                <td>${badge(u.verificado ? 'Verificado' : 'Pendiente', u.verificado ? 'verificado' : 'no-verif')}</td>
+                <td>${badge((u.activo !== 0 && u.activo !== false) ? 'Activo' : 'Inactivo', (u.activo !== 0 && u.activo !== false) ? 'activo' : 'inactivo')}</td>
+                <td>${badge((u.verificado !== 0 && u.verificado !== false) ? 'Verificado' : 'Pendiente', (u.verificado !== 0 && u.verificado !== false) ? 'verificado' : 'no-verif')}</td>
                 <td>
                     <button class="btn-sm btn-success-sm" onclick="verifyProv('${u.id}')">✅ Verificar</button>
                     <button class="btn-sm btn-warning-sm" onclick="toggleActive('${u.id}','proveedor')">
-                        ${u.activo ? '🔒' : '🔓'}
+                        ${(u.activo !== 0 && u.activo !== false) ? '🔒' : '🔓'}
                     </button>
                     <button class="btn-sm btn-danger-sm" onclick="deleteUser('${u.id}','proveedor')">🗑️</button>
                 </td>
@@ -519,17 +555,31 @@
     }
 
     // ── ÓRDENES
-    function renderOrdenes() {
+    async function renderOrdenes() {
         const estado = document.getElementById('filterEstado')?.value || '';
-        let orders = DB.getOrders();
+        const ordersRes = await DB.getOrders();
+        let orders = (ordersRes && ordersRes.ok && ordersRes.data) ? ordersRes.data : [];
         if (estado) orders = orders.filter(o => o.estado === estado);
         orders = orders.slice().reverse();
+        
+        // Cargar información de compradores
+        const compradoresMap = {};
+        for (const order of orders) {
+            if (order.comprador_id && !compradoresMap[order.comprador_id]) {
+                const userRes = await DB.getUsuario(order.comprador_id);
+                if (userRes && userRes.ok && userRes.data) {
+                    compradoresMap[order.comprador_id] = userRes.data;
+                }
+            }
+        }
+        
         document.getElementById('tablaOrdenes').innerHTML = orders.map(o => {
-            const u = DB.getUserById(o.compradorId);
-            const prods = o.productos.map(p => p.nombre).join(', ');
+            const u = compradoresMap[o.comprador_id];
+            const items = o.items || [];
+            const prods = items.map(p => p.producto_nombre || p.nombre_snap || 'Producto').join(', ');
             return `<tr>
                 <td><code style="font-size:11px;">${o.id}</code></td>
-                <td>${u ? u.nombre + ' ' + u.apellido : o.compradorId}</td>
+                <td>${u ? u.nombre + ' ' + u.apellido : o.comprador_id}</td>
                 <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${prods}">${prods}</td>
                 <td>${fmtMoney(o.total)}</td>
                 <td>${badge(o.estado, o.estado)}</td>
@@ -547,27 +597,38 @@
     }
 
     // ── ACTIONS
-    function toggleActive(id, page) {
-        const u = DB.getUserById(id);
-        DB.updateUser(id, { activo: !u.activo });
-        page === 'proveedor' ? renderProveedores() : renderCompradores();
+    async function toggleActive(id, page) {
+        const userRes = await DB.getUsuario(id);
+        if (!userRes || !userRes.ok || !userRes.data) return;
+        const u = userRes.data;
+        const nuevoEstado = (u.activo !== 0 && u.activo !== false) ? 0 : 1;
+        const res = await DB.actualizarUsuario(id, { activo: nuevoEstado });
+        if (res && res.ok) {
+            page === 'proveedor' ? await renderProveedores() : await renderCompradores();
+        }
     }
 
-    function verifyProv(id) {
-        DB.updateUser(id, { verificado: true });
-        renderProveedores();
+    async function verifyProv(id) {
+        const res = await DB.actualizarUsuario(id, { verificado: 1 });
+        if (res && res.ok) {
+            await renderProveedores();
+        }
     }
 
-    function deleteUser(id, page) {
+    async function deleteUser(id, page) {
         if (!confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) return;
-        DB.deleteUser(id);
-        page === 'proveedor' ? renderProveedores() : renderCompradores();
-        renderDashboard();
+        const res = await DB.eliminarUsuario(id);
+        if (res && res.ok) {
+            page === 'proveedor' ? await renderProveedores() : await renderCompradores();
+            await renderDashboard();
+        }
     }
 
-    function changeOrderStatus(id, estado) {
-        DB.updateOrderStatus(id, estado);
-        renderOrdenes();
+    async function changeOrderStatus(id, estado) {
+        const res = await DB.updateOrderStatus(id, estado);
+        if (res && res.ok) {
+            await renderOrdenes();
+        }
     }
 
     // ── MODAL
@@ -593,7 +654,7 @@
 
     function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 
-    function submitModal() {
+    async function submitModal() {
         const nombre   = document.getElementById('mNombre')?.value.trim();
         const apellido = document.getElementById('mApellido')?.value.trim();
         const email    = document.getElementById('mEmail')?.value.trim();
@@ -605,15 +666,36 @@
         if (!nombre || !apellido || !email || !pass)
             return alert('Completa todos los campos obligatorios.');
 
-        const res = DB.createUser({ nombre, apellido, email, telefono, password: pass,
-            role: _modalRole, empresa, nit });
-        if (!res.ok) return alert(res.msg);
+        const datos = { 
+            nombre, 
+            apellido, 
+            email, 
+            telefono, 
+            password: pass,
+            rol: _modalRole
+        };
+        
+        if (_modalRole === 'proveedor') {
+            if (!empresa || !nit) {
+                return alert('Empresa y NIT son obligatorios para proveedores.');
+            }
+            datos.empresa = empresa;
+            datos.nit = nit;
+        }
+
+        const res = await DB.registrar(datos);
+        if (!res || !res.ok) {
+            return alert(res?.msg || 'Error al crear usuario');
+        }
         closeModal();
-        _modalRole === 'proveedor' ? renderProveedores() : renderCompradores();
-        renderDashboard();
+        _modalRole === 'proveedor' ? await renderProveedores() : await renderCompradores();
+        await renderDashboard();
     }
 
-    function doLogout() { DB.logout(); window.location.href = 'login.html'; }
+    async function doLogout() {
+        await DB.logout();
+        window.location.href = 'login.html';
+    }
 
     // Init
     renderDashboard();
