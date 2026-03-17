@@ -342,8 +342,8 @@
             </ul>
 
             <div class="nav-icons">
+                <!-- FIX 1: Eliminado </button> suelto (stray end tag button) -->
                 <button class="icon-btn" onclick="toggleSearch()">🔍</button>
-                </button>
             </div>
         </nav>
     </header>
@@ -389,7 +389,8 @@
                                 <option value="">Selecciona un asunto</option>
                                 <option value="consulta">Consulta de producto</option>
                                 <option value="soporte">Soporte web</option>
-                                <option value="se"></option>
+                                <!-- FIX 2: option vacío reemplazado con label y texto -->
+                                <option value="se">Servicio</option>
                                 <option value="pedido">Estado de pedido</option>
                                 <option value="otro">Otro</option>
                             </select>
@@ -412,14 +413,15 @@
                 <div class="contact-cards">
                    <!-- <div class="contact-card"> -->  
                     
-                    </div>
+                    <!-- FIX 5: Eliminado </div> suelto (stray end tag div) -->
 
                     <div class="contact-card">
                         <div class="contact-icon">📞</div>
                         <div class="contact-card-content">
                             <h3>Teléfono</h3>
-                            <p>Ventas: <a href="tel:+57 314 2800623">+57 314 2800623</a><br>
-                            Soporte: <a href="tel:+57 316 6133839">+57 316 6133839</a><br>
+                            <!-- FIX 3 y 4: Espacios eliminados en los href tel: -->
+                            <p>Ventas: <a href="tel:+573142800623">+57 314 2800623</a><br>
+                            Soporte: <a href="tel:+573166133839">+57 316 6133839</a><br>
                             WhatsApp: <a href="https://wa.me/5731437799697">+57 314 3779969</a></p>
                         </div>
                     </div>
@@ -471,7 +473,7 @@
             </div>
         </div>
     </section>
-    </section>
+    <!-- FIX 6: Eliminado </section> duplicado (stray end tag section) -->
 
     <!-- Footer -->
     <footer>

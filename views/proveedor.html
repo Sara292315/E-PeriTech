@@ -177,11 +177,13 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
                         <div class="form-group">
                             <label>Precio actual (COP) *</label>
-                            <input id="mPrice" type="text" placeholder="319000" min="0">
+                            <!-- FIX 1: type="text" no admite min; se eliminó min="0" -->
+                            <input id="mPrice" type="text" placeholder="319000">
                         </div>
                         <div class="form-group">
                             <label>Precio anterior (COP)</label>
-                            <input id="mOldPrice" type="text" placeholder="Dejar vacío si no hay descuento" min="0">
+                            <!-- FIX 2: type="text" no admite min; se eliminó min="0" -->
+                            <input id="mOldPrice" type="text" placeholder="Dejar vacío si no hay descuento">
                         </div>
                     </div>
                     <div class="form-group">
@@ -222,7 +224,8 @@
                     <div class="form-group"><label>NIT</label><input id="pNit" type="text"></div>
                     <div class="form-group"><label>Dirección</label><input id="pDir" type="text"></div>
                     <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
-                    <h4 style="margin-bottom:14px;color:#666;">Cambiar contraseña (opcional)</h4>
+                    <!-- FIX 3: h4 saltaba de h2 a h4 (nivel 2 → 4); cambiado a h3 -->
+                    <h3 style="margin-bottom:14px;color:#666;">Cambiar contraseña (opcional)</h3>
                     <div class="form-group"><label>Nueva contraseña</label><input id="pPass" type="password" placeholder="Dejar vacío para no cambiar"></div>
                     <button type="submit" class="btn-save">💾 Guardar cambios</button>
                 </form>
