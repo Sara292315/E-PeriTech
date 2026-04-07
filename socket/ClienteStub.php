@@ -33,6 +33,9 @@
 //  Producto, lo convierte a bytes con serialize() y lo
 //  inyecta en el socket. El programa principal del cliente
 //  llama a enviarProducto() como si fuera un metodo local.
+//  GUIA 5 — Actividad 2: Marshaling de objetos
+//  El cliente principal llama a este Stub como si fuera local.
+//  El Stub serializa el objeto y lo envia por socket.
 // ============================================================
 
 require_once 'Producto.php';
@@ -61,6 +64,7 @@ class ClienteStub {
         //  AF_INET = protocolo IPv4, SOCK_STREAM = TCP confiable,
         //  SOL_TCP = capa de transporte TCP.
         // ---------------------------------------------------------
+        // 1. Crear socket cliente
         $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if ($socket === false) {
             return ['estado' => 'ERROR', 'mensaje' => 'No se pudo crear socket'];
@@ -71,6 +75,7 @@ class ClienteStub {
         //  socket_connect() inicia el apretón de manos TCP con
         //  el servidor en la IP y puerto de la topologia.
         // ---------------------------------------------------------
+        // 2. Conectar al servidor en 127.0.0.1:8081
         if (!socket_connect($socket, $this->host, $this->port)) {
             socket_close($socket);
             return ['estado' => 'ERROR', 'mensaje' => 'No se pudo conectar al servidor'];
@@ -99,6 +104,15 @@ class ClienteStub {
         //  Lectura en bucle hasta detectar el delimitador ##FIN##
         //  para evitar que los mensajes se fragmenten en el buffer.
         // ---------------------------------------------------------
+        // 3. MARSHALING: convertir el objeto a bytes
+        $payload = serialize($producto) . '##FIN##';
+        echo "[STUB] Payload: " . strlen($payload) . " bytes. Enviando..." . PHP_EOL;
+
+        // 4. Enviar los bytes por el socket
+        socket_write($socket, $payload);
+        echo "[STUB] Datos enviados. Esperando respuesta..." . PHP_EOL;
+
+        // 5. Leer la respuesta del servidor
         $buffer = '';
         while (true) {
             $chunk = socket_read($socket, 4096);
@@ -119,6 +133,10 @@ class ClienteStub {
         //  socket_close() libera el puerto del cliente correctamente
         //  para ejecuciones posteriores del sistema distribuido.
         // ---------------------------------------------------------
+        // 6. Deserializar la respuesta del servidor
+        $respuesta = unserialize(str_replace('##FIN##', '', $buffer));
+
+        // 7. Cerrar el socket correctamente
         socket_close($socket);
         echo "[STUB] Socket cerrado." . PHP_EOL;
 

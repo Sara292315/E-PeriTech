@@ -23,6 +23,8 @@
 //  intercambio entre cliente y servidor. Debe ser
 //  identica en ambos extremos para que el Marshaling
 //  (serialize/unserialize) funcione correctamente.
+//  GUÍA 5 — Actividad 1
+//  Este archivo es idéntico en cliente y servidor.
 // ============================================================
 
 class Producto {
