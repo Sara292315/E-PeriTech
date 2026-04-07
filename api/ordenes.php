@@ -1,7 +1,22 @@
 <?php
 // ============================================================
-//  E-PeriTech — API Órdenes
+//  E-PeriTech — API Ordenes
 // ============================================================
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 2: Capa de Logica de Negocio
+//  Gestiona el proceso de compra desde el servidor.
+//  Las ordenes son un proceso critico que se ejecuta
+//  remotamente en Ubuntu+PHP, nunca en el cliente.
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 3: Procesos Remotos del Servidor
+//  Registro de solicitudes de contacto/compra y
+//  administracion futura del catalogo, tal como se
+//  definio en los procesos remotos de la Guia #1.
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #2 - Actividad 1: Middleware Web Services REST
+//  Endpoints via HTTP + JSON para gestion de ordenes.
+// ============================================================
+
 
 require_once 'config.php';
 session_start();

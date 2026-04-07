@@ -1,3 +1,19 @@
+// ============================================================
+//  E-PeriTech — product-detail.js
+// ============================================================
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 3: Procesos del Cliente
+//  Visualizacion del detalle de un producto. Consume
+//  el endpoint GET /api/productos.php?action=obtener
+//  siguiendo el flujo del diagrama de secuencia de
+//  la Guia #1 Actividad 4.
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 4: Diagrama de Secuencia
+//  Implementa pasos 1-6 del diagrama: cliente solicita,
+//  servidor valida, consulta BD, devuelve JSON, cliente
+//  renderiza la respuesta en pantalla.
+// ============================================================
+
 // product-detail.js - Carga productos desde la API
 console.log('✅ Archivo product-detail.js cargado correctamente');
 

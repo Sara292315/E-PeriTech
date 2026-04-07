@@ -1,16 +1,34 @@
 <?php
 // ============================================================
 //  E-PeriTech — API Usuarios
-//  Endpoints:
+// ============================================================
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 2: Capa de Logica de Negocio
+//  Gestiona autenticacion y usuarios desde el servidor
+//  Ubuntu+PHP, parte de la Capa de Logica de Negocio
+//  del modelo de 3 capas definido en la Guia #1.
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 3: Procesos Remotos del Servidor
+//  Validaciones criticas ejecutadas remotamente:
+//  registro, login, gestion de sesiones y permisos.
+//  Ninguna validacion de seguridad ocurre en el cliente.
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #2 - Actividad 1: Transparencia de Ubicacion
+//  El cliente no sabe donde se ejecuta la validacion
+//  del login. Todo parece un unico sistema desde la
+//  perspectiva del usuario (transparencia de ubicacion).
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #2 - Actividad 1: Middleware Web Services REST
+//  Endpoints via HTTP + JSON:
 //    POST   /api/usuarios.php?action=registro
 //    POST   /api/usuarios.php?action=login
 //    POST   /api/usuarios.php?action=logout
 //    GET    /api/usuarios.php?action=sesion
 //    GET    /api/usuarios.php?action=listar
-//    GET    /api/usuarios.php?action=obtener&id=USR-XXX
-//    PUT    /api/usuarios.php?action=actualizar&id=USR-XXX
-//    DELETE /api/usuarios.php?action=eliminar&id=USR-XXX
+//    PUT    /api/usuarios.php?action=actualizar&id=X
+//    DELETE /api/usuarios.php?action=eliminar&id=X
 // ============================================================
+
 
 require_once 'config.php';
 session_start();

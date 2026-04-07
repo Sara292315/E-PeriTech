@@ -1,7 +1,23 @@
 -- ============================================================
 --  E-PeriTech — Base de Datos MariaDB
---  Generado automáticamente desde el proyecto E-PeriTech
 -- ============================================================
+-- --------------CLIENTE SERVIDOR-------------------------
+--  GUIA #1 - Actividad 2: Capa de Datos (3 Capas)
+--  Este archivo define la Capa de Datos del sistema:
+--  el esquema completo de la base de datos MariaDB que
+--  almacena productos, marcas, usuarios y solicitudes.
+--  Corresponde al modelo de 3 capas de la Guia #1.
+-- --------------CLIENTE SERVIDOR-------------------------
+--  GUIA #1 - Actividad 3: Procesos Remotos del Servidor
+--  La base de datos solo es accedida por el servidor
+--  PHP (Ubuntu), nunca directamente por el cliente web.
+--  Puerto 3306 = capa de datos segun Guia #1 Act. 2.
+-- --------------CLIENTE SERVIDOR-------------------------
+--  GUIA #2 - Actividad 3: Topologia Logica del MVP
+--  Corre en localhost del servidor Ubuntu (IP 192.168.1.50)
+--  Puerto 3306 TCP segun la tabla de puertos de la Guia #2.
+-- ============================================================
+
 
 CREATE DATABASE IF NOT EXISTS eperitech
     CHARACTER SET utf8mb4
