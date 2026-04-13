@@ -22,7 +22,11 @@
 
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');       // usuario de phpMyAdmin
+<<<<<<< Updated upstream
 define('DB_PASS', '');           // contrasena (vacia por defecto en XAMPP)
+=======
+define('DB_PASS', '1234');           // contraseña (vacía por defecto en XAMPP)
+>>>>>>> Stashed changes
 define('DB_NAME', 'eperitech');
 define('DB_PORT', 3306);
 
