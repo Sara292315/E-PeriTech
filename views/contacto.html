@@ -1,4 +1,26 @@
 <!DOCTYPE html>
+<!--
+  ============================================================
+  E-PeriTech — contacto.html
+  ============================================================
+ --------------CLIENTE SERVIDOR-------------------------
+  GUIA #1 - Actividad 2: Capa de Presentacion
+  Formulario de contacto del cliente. Implementa la
+  captura de datos del usuario antes de enviarlos al
+  servidor para validacion y procesamiento remoto.
+ --------------CLIENTE SERVIDOR-------------------------
+  GUIA #1 - Actividad 3: Procesos del Cliente
+  Captura de datos del usuario (formulario de contacto).
+  La validacion critica se ejecuta en el servidor PHP,
+  no en el cliente, segun la Guia #1 Act. 3.
+ --------------CLIENTE SERVIDOR-------------------------
+  GUIA #1 - Actividad 4: Payload
+  Los datos del formulario se envian como payload JSON
+  al servidor siguiendo la estructura definida en la
+  Guia #1 Actividad 4.
+  ============================================================
+-->
+
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -366,7 +388,7 @@
                     ✅ ¡Mensaje enviado con éxito! Te contactaremos pronto.
                 </div>
 
-                <form id="contactForm" onsubmit="handleSubmit(event)">
+                <form id="contactForm" action="../api/usuarios.php" method="POST" onsubmit="handleSubmit(event)">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nombre">Nombre completo *</label>

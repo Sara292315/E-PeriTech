@@ -1,6 +1,28 @@
 <?php
 // ============================================================
 //  E-PeriTech — API Productos
+// ============================================================
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 2: Capa de Logica de Negocio
+//  Este archivo implementa la Capa de Logica de Negocio
+//  del modelo de 3 capas: valida datos, consulta la BD
+//  y retorna respuestas JSON al cliente.
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 3: Procesos Remotos del Servidor
+//  Todos los procesos aqui son ejecutados remotamente
+//  en el servidor (Ubuntu+PHP): consulta por categoria,
+//  gestion de ofertas, comparacion y administracion
+//  del catalogo de productos.
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 4: Payload de Comunicacion
+//  Recibe y responde con JSON estructurado siguiendo
+//  el payload definido en la Guia #1 Actividad 4:
+//  {tipo, categoria, marca, usuario, timestamp}.
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #2 - Actividad 1: Middleware Web Services REST
+//  Implementa el modelo de Web Services aplicado en
+//  E-PeriTech: comunicacion via HTTP, datos en JSON,
+//  independencia del lenguaje, arquitectura REST.
 //  Endpoints:
 //    GET    /api/productos.php?action=listar
 //    GET    /api/productos.php?action=obtener&id=1
@@ -8,6 +30,7 @@
 //    PUT    /api/productos.php?action=actualizar&id=1
 //    DELETE /api/productos.php?action=eliminar&id=1
 // ============================================================
+
 
 require_once 'config.php';
 

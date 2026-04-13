@@ -1,7 +1,33 @@
 /**
  * E-PeriTech — database.js
- * Capa de datos: conecta con la API PHP → MariaDB
- * Reemplaza el uso de localStorage por llamadas reales al servidor.
+ * ============================================================
+ * --------------CLIENTE SERVIDOR-------------------------
+ * GUIA #1 - Actividad 2: Capa de Presentacion y Logica
+ * Este archivo es el puente entre la Capa de Presentacion
+ * (HTML/CSS/JS del cliente) y la Capa de Logica de Negocio
+ * (API PHP en el servidor Ubuntu). Implementa el modelo
+ * de 3 capas definido en la Guia #1 Actividad 2.
+ * --------------CLIENTE SERVIDOR-------------------------
+ * GUIA #1 - Actividad 3: Procesos del Cliente
+ * Captura de datos del usuario y envio al servidor antes
+ * de la transmision. Ninguna logica critica se ejecuta
+ * aqui — todo se delega al servidor via API.
+ * --------------CLIENTE SERVIDOR-------------------------
+ * GUIA #1 - Actividad 4: Payload de Comunicacion
+ * Implementa el intercambio de datos en formato JSON
+ * entre cliente y servidor (Request/Response) tal como
+ * se definio en el diagrama de secuencia de la Guia #1.
+ * --------------CLIENTE SERVIDOR-------------------------
+ * GUIA #2 - Actividad 1: Middleware Web Services REST
+ * Implementa el modelo de Web Services aplicado en
+ * E-PeriTech: fetch() via HTTP, datos en JSON, REST.
+ * Es la capa de transparencia de ubicacion del cliente:
+ * el usuario no sabe si los datos vienen de la BD remota.
+ * --------------CLIENTE SERVIDOR-------------------------
+ * GUIA #2 - Actividad 3: Topologia Logica del MVP
+ * BASE '../api' apunta a la Capa de Logica del servidor
+ * Apache/PHP corriendo en Ubuntu (puerto 80/8080).
+ * ============================================================
  */
 
 const API = {
@@ -48,6 +74,23 @@ const API = {
 
     async login(email, password) {
         const res = await this._fetch(`${this.BASE}/usuarios.php?action=login`, 'POST', { email, password });
+        if (res.ok && res.data) {
+            localStorage.setItem('eperitech_session', JSON.stringify({
+                userId:  res.data.id,
+                rol:     res.data.rol,
+                nombre:  res.data.nombre,
+                email:   res.data.email,
+                avatar:  res.data.avatar,
+            }));
+        }
+        return res;
+    },
+
+    // ── LOGIN CON GOOGLE ──────────────────────────────────────────────
+    // Envía el access_token de Google al servidor para verificar identidad
+    // y crear/recuperar la sesión del usuario.
+    async loginGoogle(accessToken) {
+        const res = await this._fetch(`${this.BASE}/usuarios.php?action=loginGoogle`, 'POST', { access_token: accessToken });
         if (res.ok && res.data) {
             localStorage.setItem('eperitech_session', JSON.stringify({
                 userId:  res.data.id,

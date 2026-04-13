@@ -1,3 +1,17 @@
+// ============================================================
+//  E-PeriTech — cart.js
+// ============================================================
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 2: Capa de Presentacion (Cliente)
+//  Gestion del carrito de compras en el lado del cliente.
+//  Utiliza localStorage como almacenamiento temporal
+//  antes de enviar la orden al servidor (Capa de Negocio).
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 3: Procesos del Cliente
+//  Captura de datos del usuario (productos seleccionados,
+//  cantidades) antes de la transmision al servidor PHP.
+// ============================================================
+
 /**
  * E-PeriTech - Sistema de Carrito de Compras
  * Vinculado a sesión de usuario (localStorage por userId)

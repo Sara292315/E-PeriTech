@@ -1,3 +1,17 @@
+// ============================================================
+//  E-PeriTech — comparar.js
+// ============================================================
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 1: Escenario de Software
+//  Implementa la funcionalidad de comparacion de productos
+//  que justifica la arquitectura distribuida: "Dificultad
+//  para comparar productos de forma clara" (problematica).
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 3: Procesos del Cliente
+//  Visualizacion comparativa ejecutada en el cliente
+//  con datos obtenidos remotamente desde el servidor PHP.
+// ============================================================
+
 // Obtener lista de comparación
 function getCompareList() {
     return JSON.parse(localStorage.getItem('compareList') || '[]');

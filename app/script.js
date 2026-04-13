@@ -1,3 +1,25 @@
+// ============================================================
+//  E-PeriTech — script.js
+// ============================================================
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 2: Capa de Presentacion (Cliente)
+//  Este archivo implementa la Capa de Presentacion del
+//  modelo de 3 capas: logica de interfaz, navegacion
+//  por el catalogo, animaciones y validaciones basicas
+//  del lado del cliente (HTML + CSS + JavaScript).
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 3: Procesos del Cliente
+//  Procesos ejecutados en el cliente definidos en la
+//  Guia #1 Act. 3: visualizacion del catalogo, navegacion
+//  por secciones (Inicio, Catalogo, Ofertas, Marcas,
+//  Contacto) e interacciones visuales.
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 4: Diagrama de Secuencia
+//  loadProducts() implementa el paso 1 del diagrama de
+//  secuencia: "El cliente envia una solicitud al servidor"
+//  y el paso 6: "El cliente muestra los resultados".
+// ============================================================
+
 // Productos: se leen desde database.js (API) para reflejar cambios de proveedores
 let products = [];
 
@@ -258,8 +280,8 @@ function renderNavAuth() {
         btn.innerHTML = `<span style="font-size:20px;">${session.avatar || '👤'}</span>`;
         btn.title = session.nombre;
         btn.onclick = () => {
-            if (session.role === 'admin')          window.location.href = 'admin.html';
-            else if (session.role === 'proveedor') window.location.href = 'proveedor.html';
+            if (session.rol === 'admin')          window.location.href = 'admin.html';
+            else if (session.rol === 'proveedor') window.location.href = 'proveedor.html';
             else                                   window.location.href = 'micuenta.html';
         };
     } else {
