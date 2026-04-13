@@ -280,8 +280,8 @@ function renderNavAuth() {
         btn.innerHTML = `<span style="font-size:20px;">${session.avatar || '👤'}</span>`;
         btn.title = session.nombre;
         btn.onclick = () => {
-            if (session.role === 'admin')          window.location.href = 'admin.html';
-            else if (session.role === 'proveedor') window.location.href = 'proveedor.html';
+            if (session.rol === 'admin')          window.location.href = 'admin.html';
+            else if (session.rol === 'proveedor') window.location.href = 'proveedor.html';
             else                                   window.location.href = 'micuenta.html';
         };
     } else {
