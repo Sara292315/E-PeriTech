@@ -284,23 +284,26 @@
 
                     <div class="divider">o ingresa con tu correo</div>
 
+                    <form id="formLogin" action="../api/usuarios.php?action=login" method="POST">
                     <div class="form-group">
-                        <label>Correo electrónico</label>
-                        <input type="email" id="loginEmail" placeholder="tu@correo.com" autocomplete="email">
+                        <label for="loginEmail">Correo electrónico</label>
+                        <input type="email" id="loginEmail" name="email" placeholder="tu@correo.com" autocomplete="email">
                     </div>
                     <div class="form-group">
-                        <label>Contraseña</label>
-                        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+                        <label for="loginPass">Contraseña</label>
+                        <input type="password" id="loginPass" name="password" placeholder="••••••••" autocomplete="current-password">
                     </div>
-                    <button class="btn-auth" onclick="doLogin()">Ingresar →</button>
+                    <button class="btn-auth" type="button" onclick="doLogin()">Ingresar →</button>
+                    </form>
 
                 </div>
 
                 <!-- ── REGISTER ── -->
                 <div id="registerPanel" class="form-panel">
+                    <form id="formRegistro" action="../api/usuarios.php?action=registro" method="POST">
                     <div class="form-group">
-                        <label>Tipo de cuenta</label>
-                        <select id="regRole" onchange="toggleProveedorFields()">
+                        <label for="regRole">Tipo de cuenta</label>
+                        <select id="regRole" name="rol" onchange="toggleProveedorFields()">
                             <option value="comprador">👤 Comprador</option>
                             <option value="proveedor">🏭 Proveedor / Empresa</option>
                         </select>
@@ -308,49 +311,50 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Nombre</label>
-                            <input type="text" id="regNombre" placeholder="Juan">
+                            <label for="regNombre">Nombre</label>
+                            <input type="text" id="regNombre" name="nombre" placeholder="Juan">
                         </div>
                         <div class="form-group">
-                            <label>Apellido</label>
-                            <input type="text" id="regApellido" placeholder="García">
+                            <label for="regApellido">Apellido</label>
+                            <input type="text" id="regApellido" name="apellido" placeholder="García">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label>Correo electrónico</label>
-                        <input type="email" id="regEmail" placeholder="tu@correo.com">
+                        <label for="regEmail">Correo electrónico</label>
+                        <input type="email" id="regEmail" name="email" placeholder="tu@correo.com">
                     </div>
 
                     <div class="form-group">
-                        <label>Teléfono</label>
-                        <input type="tel" id="regTelefono" placeholder="+57 300 000 0000">
+                        <label for="regTelefono">Teléfono</label>
+                        <input type="tel" id="regTelefono" name="telefono" placeholder="+57 300 000 0000">
                     </div>
 
                     <!-- Campos proveedor -->
                     <div id="proveedorFields" style="display:none">
                         <div class="form-group">
-                            <label>Nombre de la empresa</label>
-                            <input type="text" id="regEmpresa" placeholder="Mi Empresa S.A.S">
+                            <label for="regEmpresa">Nombre de la empresa</label>
+                            <input type="text" id="regEmpresa" name="empresa" placeholder="Mi Empresa S.A.S">
                         </div>
                         <div class="form-group">
-                            <label>NIT</label>
-                            <input type="text" id="regNit" placeholder="900.000.000-0">
+                            <label for="regNit">NIT</label>
+                            <input type="text" id="regNit" name="nit" placeholder="900.000.000-0">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label>Contraseña</label>
-                        <input type="password" id="regPass" placeholder="Mínimo 8 caracteres">
+                        <label for="regPass">Contraseña</label>
+                        <input type="password" id="regPass" name="password" placeholder="Mínimo 8 caracteres">
                         <div class="field-hint">Usa letras, números y símbolos para mayor seguridad.</div>
                     </div>
 
                     <div class="form-group">
-                        <label>Confirmar contraseña</label>
-                        <input type="password" id="regPass2" placeholder="Repite tu contraseña">
+                        <label for="regPass2">Confirmar contraseña</label>
+                        <input type="password" id="regPass2" name="confirmar_password" placeholder="Repite tu contraseña">
                     </div>
 
-                    <button class="btn-auth" onclick="doRegister()">Crear cuenta →</button>
+                    <button class="btn-auth" type="button" onclick="doRegister()">Crear cuenta →</button>
+                    </form>
                 </div>
             </div>
         </div>
