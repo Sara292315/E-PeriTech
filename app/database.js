@@ -86,6 +86,23 @@ const API = {
         return res;
     },
 
+    // ── LOGIN CON GOOGLE ──────────────────────────────────────────────
+    // Envía el access_token de Google al servidor para verificar identidad
+    // y crear/recuperar la sesión del usuario.
+    async loginGoogle(accessToken) {
+        const res = await this._fetch(`${this.BASE}/usuarios.php?action=loginGoogle`, 'POST', { access_token: accessToken });
+        if (res.ok && res.data) {
+            localStorage.setItem('eperitech_session', JSON.stringify({
+                userId:  res.data.id,
+                rol:     res.data.rol,
+                nombre:  res.data.nombre,
+                email:   res.data.email,
+                avatar:  res.data.avatar,
+            }));
+        }
+        return res;
+    },
+
     async logout() {
         localStorage.removeItem('eperitech_session');
         return this._fetch(`${this.BASE}/usuarios.php?action=logout`, 'POST');

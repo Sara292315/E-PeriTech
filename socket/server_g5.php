@@ -44,8 +44,6 @@
 //  (Unmarshaling). unserialize() convierte los bytes de
 //  vuelta al objeto Producto original, validando que
 //  el estado se mantiene igual al enviado por el cliente.
-//  GUIA 5 — Actividad 3: Unmarshaling
-//  Uso: php server_g5.php
 // ============================================================
 
 require_once 'Producto.php';
@@ -65,7 +63,6 @@ echo "=== E-PeriTech | Servidor Guia 5 ===" . PHP_EOL;
 //  AF_INET = IPv4, SOCK_STREAM = TCP, SOL_TCP = transporte.
 //  Se valida el retorno — si falla, reporta el error tecnico.
 // ---------------------------------------------------------
-// Crear socket
 $servidor = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 if ($servidor === false) {
     die("Error al crear socket: " . socket_strerror(socket_last_error()) . PHP_EOL);
@@ -82,8 +79,6 @@ socket_set_option($servidor, SOL_SOCKET, SO_REUSEADDR, 1);
 //  GUIA #3 - Actividad 2: Bind del socket
 //  Enlaza el socket a la IP y puerto de la topologia.
 // ---------------------------------------------------------
-socket_set_option($servidor, SOL_SOCKET, SO_REUSEADDR, 1);
-
 if (!socket_bind($servidor, HOST, PORT)) {
     die("Error en bind: " . socket_strerror(socket_last_error($servidor)) . PHP_EOL);
 }
@@ -102,7 +97,6 @@ echo "Esperando conexion del cliente..." . PHP_EOL . PHP_EOL;
 //  socket_accept() bloquea el servidor hasta que un cliente
 //  se conecte, implementando el handshake de la Guia #3.
 // ---------------------------------------------------------
-// Aceptar conexion entrante
 $cliente = socket_accept($servidor);
 if ($cliente === false) {
     die("Error en accept: " . socket_strerror(socket_last_error($servidor)) . PHP_EOL);
@@ -116,7 +110,6 @@ echo "[CONEXION] Cliente conectado." . PHP_EOL;
 //  el delimitador ##FIN## que evita fragmentacion del mensaje
 //  en el buffer de red (definido en Guia #1 Actividad 4).
 // ---------------------------------------------------------
-// Leer los bytes que llegan por el socket
 $buffer = '';
 while (true) {
     $chunk = socket_read($cliente, 4096);
@@ -134,11 +127,6 @@ echo "[RECIBIDO] " . strlen($payload) . " bytes." . PHP_EOL;
 //  al objeto Producto original. instanceof valida que la
 //  reconstruccion fue exitosa y el estado se mantiene.
 // ---------------------------------------------------------
-// Quitar el delimitador del final
-$payload = str_replace('##FIN##', '', $buffer);
-echo "[RECIBIDO] " . strlen($payload) . " bytes." . PHP_EOL;
-
-// UNMARSHALING: convertir bytes de vuelta a objeto PHP
 $producto = unserialize($payload);
 
 if ($producto instanceof Producto) {
@@ -156,10 +144,6 @@ if ($producto instanceof Producto) {
     //  El servidor serializa su respuesta y la envia con ##FIN##
     //  siguiendo el flujo Request/Response de la Guia #1 Act. 4.
     // ---------------------------------------------------------
-    echo $producto->mostrar() . PHP_EOL;
-    echo "=========================================" . PHP_EOL . PHP_EOL;
-
-    // Enviar respuesta serializada de vuelta al cliente
     $respuesta = serialize([
         'estado'   => 'OK',
         'mensaje'  => 'Producto recibido y reconstruido',
@@ -179,7 +163,6 @@ if ($producto instanceof Producto) {
 //  conectado y el socket servidor principal. Esto libera
 //  los puertos en Ubuntu para ejecuciones posteriores.
 // ---------------------------------------------------------
-// Cierre seguro de ambos sockets
 socket_close($cliente);
 socket_close($servidor);
 echo PHP_EOL . "[FIN] Sockets cerrados correctamente." . PHP_EOL;

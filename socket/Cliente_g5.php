@@ -20,9 +20,6 @@
 //  como si fuera un metodo local. El Stub se encarga
 //  de empaquetar (Marshaling) el objeto y enviarlo,
 //  otorgando la primera capa de transparencia al sistema.
-//  GUIA 5 — Actividad 2
-//  Este archivo solo maneja la logica de negocio.
-//  No sabe nada de sockets — delega todo al Stub.
 // ============================================================
 
 require_once 'Producto.php';
@@ -40,8 +37,6 @@ echo "=== E-PeriTech | Cliente Guia 5 ===" . PHP_EOL . PHP_EOL;
 //  El objeto Producto creado aqui es el mismo que
 //  sera serializado y enviado al servidor.
 // ---------------------------------------------------------
-// Crear el objeto de negocio
-// (igual que un producto real de la base de datos E-PeriTech)
 $producto = new Producto(
     2,
     'Teclado Mecanico RGB Gaming',
@@ -72,12 +67,6 @@ $respuesta = $stub->enviarProducto($producto);
 //  equivalente al flujo Request/Response del diagrama
 //  de secuencia definido en la Guia #1 Actividad 4.
 // ---------------------------------------------------------
-// Usar el Stub — el cliente NO toca el socket directamente
-// Para el cliente es como llamar a un metodo local normal
-$stub = new ClienteStub('127.0.0.1', 8081);
-$respuesta = $stub->enviarProducto($producto);
-
-// Mostrar la respuesta que vino del servidor
 echo PHP_EOL . "=== RESPUESTA DEL SERVIDOR ===" . PHP_EOL;
 foreach ($respuesta as $clave => $valor) {
     echo "  $clave: $valor" . PHP_EOL;
