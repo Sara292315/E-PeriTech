@@ -275,6 +275,9 @@
             <div class="nav-item" onclick="showPage('usuarios')">
                 <span class="nav-icon">👥</span> Usuarios
             </div>
+            <div class="nav-item" onclick="showPage('admins')">
+                <span class="nav-icon">👨‍💼</span> Administradores
+            </div>
             <div class="nav-item" onclick="showPage('proveedores')">
                 <span class="nav-icon">🏭</span> Proveedores
             </div>
@@ -348,6 +351,27 @@
                         <th>ID</th><th>Empresa</th><th>Contacto</th><th>NIT</th><th>Estado</th><th>Verificado</th><th>Acciones</th>
                     </tr></thead>
                     <tbody id="tablaProveedores"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ADMINISTRADORES -->
+        <div id="page-admins" class="page-panel">
+            <div class="page-title">Administradores</div>
+            <div class="page-sub">Gestión de cuentas con acceso total al sistema</div>
+            <div class="section-card">
+                <div class="section-header">
+                    <h3>Lista de Administradores</h3>
+                    <button class="btn-add" onclick="openModal('admin')">＋ Nuevo administrador</button>
+                </div>
+                <div class="search-filter">
+                    <input type="text" id="searchAdmin" placeholder="Buscar por nombre o correo..." oninput="renderAdmins()">
+                </div>
+                <table>
+                    <thead><tr>
+                        <th>ID</th><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Estado</th><th>Registro</th><th>Acciones</th>
+                    </tr></thead>
+                    <tbody id="tablaAdmins"></tbody>
                 </table>
             </div>
         </div>

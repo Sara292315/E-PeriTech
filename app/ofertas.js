@@ -16,7 +16,8 @@
 const offerProducts = products.filter(p => p.discount > 0);
 
 // Renderizar ofertas
-function renderOffers(filteredOffers = offerProducts) {
+function renderOffers(filteredOffers = null) {
+    if (filteredOffers === null) filteredOffers = getOfferProducts();
     const grid = document.getElementById('offersGrid');
     
     if (filteredOffers.length === 0) {
@@ -54,7 +55,7 @@ function viewProductDetail(productId) {
 }
 
 // Filtrar ofertas
-function filterOffers(type) {
+function filterOffers(type, event) {
     // Actualizar botones activos
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -65,13 +66,13 @@ function filterOffers(type) {
     
     switch(type) {
         case 'high':
-            filtered = offerProducts.filter(p => p.discount > 15);
+            filtered = getOfferProducts().filter(p => p.discount > 15);
             break;
         case 'medium':
-            filtered = offerProducts.filter(p => p.discount >= 10 && p.discount <= 15);
+            filtered = getOfferProducts().filter(p => p.discount >= 10 && p.discount <= 15);
             break;
         case 'low':
-            filtered = offerProducts.filter(p => p.discount < 10);
+            filtered = getOfferProducts().filter(p => p.discount < 10);
             break;
         case 'all':
         default:
@@ -113,7 +114,8 @@ function startCountdown() {
 }
 
 // Inicializar
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    if (typeof loadProducts === 'function') await loadProducts();
     renderOffers();
     startCountdown();
 });

@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     id: apiProduct.id,
                     name: apiProduct.nombre,
                     price: parseFloat(apiProduct.precio),
-                    oldPrice: apiProduct.precio_anterior ? parseFloat(apiProduct.precio_anterior) : null,
+                    oldPrice: apiProduct.precio_viejo ? parseFloat(apiProduct.precio_viejo) : null,
                     discount: apiProduct.descuento || 0,
                     icon: apiProduct.icono || '📦',
                     category: apiProduct.categoria_slug || '',
@@ -355,7 +355,7 @@ async function loadRelatedProducts(category, currentId) {
                         id: p.id,
                         name: p.nombre,
                         price: parseFloat(p.precio),
-                        oldPrice: p.precio_anterior ? parseFloat(p.precio_anterior) : null,
+                        oldPrice: p.precio_viejo ? parseFloat(p.precio_viejo) : null,
                         discount: p.descuento || 0,
                         icon: p.icono || '📦',
                         category: p.categoria_slug || ''

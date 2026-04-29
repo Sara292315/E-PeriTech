@@ -33,7 +33,7 @@ async function loadProducts() {
                     id: p.id,
                     name: p.nombre,
                     price: parseFloat(p.precio),
-                    oldPrice: p.precio_anterior ? parseFloat(p.precio_anterior) : null,
+                    oldPrice: p.precio_viejo ? parseFloat(p.precio_viejo) : null,
                     discount: p.descuento || 0,
                     icon: p.icono || '📦',
                     category: p.categoria_slug || '',
@@ -280,8 +280,8 @@ function renderNavAuth() {
         btn.innerHTML = `<span style="font-size:20px;">${session.avatar || '👤'}</span>`;
         btn.title = session.nombre;
         btn.onclick = () => {
-            if (session.rol === 'admin')          window.location.href = 'admin.html';
-            else if (session.rol === 'proveedor') window.location.href = 'proveedor.html';
+            if (session.role === 'admin')          window.location.href = 'admin.html';
+            else if (session.role === 'proveedor') window.location.href = 'proveedor.html';
             else                                   window.location.href = 'micuenta.html';
         };
     } else {

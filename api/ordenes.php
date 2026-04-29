@@ -159,4 +159,6 @@ try {
 
 } catch (PDOException $e) {
     responder(false, null, 'Error de base de datos: ' . $e->getMessage(), 500);
+} catch (Throwable $e) {
+    responder(false, null, 'Error del servidor: ' . $e->getMessage(), 500);
 }

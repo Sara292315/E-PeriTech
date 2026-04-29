@@ -284,26 +284,23 @@
 
                     <div class="divider">o ingresa con tu correo</div>
 
-                    <form id="formLogin" action="../api/usuarios.php?action=login" method="POST">
                     <div class="form-group">
-                        <label for="loginEmail">Correo electrónico</label>
-                        <input type="email" id="loginEmail" name="email" placeholder="tu@correo.com" autocomplete="email">
+                        <label>Correo electrónico</label>
+                        <input type="email" id="loginEmail" placeholder="tu@correo.com" autocomplete="email">
                     </div>
                     <div class="form-group">
-                        <label for="loginPass">Contraseña</label>
-                        <input type="password" id="loginPass" name="password" placeholder="••••••••" autocomplete="current-password">
+                        <label>Contraseña</label>
+                        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
                     </div>
-                    <button class="btn-auth" type="button" onclick="doLogin()">Ingresar →</button>
-                    </form>
+                    <button class="btn-auth" onclick="doLogin()">Ingresar →</button>
 
                 </div>
 
                 <!-- ── REGISTER ── -->
                 <div id="registerPanel" class="form-panel">
-                    <form id="formRegistro" action="../api/usuarios.php?action=registro" method="POST">
                     <div class="form-group">
-                        <label for="regRole">Tipo de cuenta</label>
-                        <select id="regRole" name="rol" onchange="toggleProveedorFields()">
+                        <label>Tipo de cuenta</label>
+                        <select id="regRole" onchange="toggleProveedorFields()">
                             <option value="comprador">👤 Comprador</option>
                             <option value="proveedor">🏭 Proveedor / Empresa</option>
                         </select>
@@ -311,50 +308,49 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="regNombre">Nombre</label>
-                            <input type="text" id="regNombre" name="nombre" placeholder="Juan">
+                            <label>Nombre</label>
+                            <input type="text" id="regNombre" placeholder="Juan">
                         </div>
                         <div class="form-group">
-                            <label for="regApellido">Apellido</label>
-                            <input type="text" id="regApellido" name="apellido" placeholder="García">
+                            <label>Apellido</label>
+                            <input type="text" id="regApellido" placeholder="García">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="regEmail">Correo electrónico</label>
-                        <input type="email" id="regEmail" name="email" placeholder="tu@correo.com">
+                        <label>Correo electrónico</label>
+                        <input type="email" id="regEmail" placeholder="tu@correo.com">
                     </div>
 
                     <div class="form-group">
-                        <label for="regTelefono">Teléfono</label>
-                        <input type="tel" id="regTelefono" name="telefono" placeholder="+57 300 000 0000">
+                        <label>Teléfono</label>
+                        <input type="tel" id="regTelefono" placeholder="+57 300 000 0000">
                     </div>
 
                     <!-- Campos proveedor -->
                     <div id="proveedorFields" style="display:none">
                         <div class="form-group">
-                            <label for="regEmpresa">Nombre de la empresa</label>
-                            <input type="text" id="regEmpresa" name="empresa" placeholder="Mi Empresa S.A.S">
+                            <label>Nombre de la empresa</label>
+                            <input type="text" id="regEmpresa" placeholder="Mi Empresa S.A.S">
                         </div>
                         <div class="form-group">
-                            <label for="regNit">NIT</label>
-                            <input type="text" id="regNit" name="nit" placeholder="900.000.000-0">
+                            <label>NIT</label>
+                            <input type="text" id="regNit" placeholder="900.000.000-0">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="regPass">Contraseña</label>
-                        <input type="password" id="regPass" name="password" placeholder="Mínimo 8 caracteres">
+                        <label>Contraseña</label>
+                        <input type="password" id="regPass" placeholder="Mínimo 8 caracteres">
                         <div class="field-hint">Usa letras, números y símbolos para mayor seguridad.</div>
                     </div>
 
                     <div class="form-group">
-                        <label for="regPass2">Confirmar contraseña</label>
-                        <input type="password" id="regPass2" name="confirmar_password" placeholder="Repite tu contraseña">
+                        <label>Confirmar contraseña</label>
+                        <input type="password" id="regPass2" placeholder="Repite tu contraseña">
                     </div>
 
-                    <button class="btn-auth" type="button" onclick="doRegister()">Crear cuenta →</button>
-                    </form>
+                    <button class="btn-auth" onclick="doRegister()">Crear cuenta →</button>
                 </div>
             </div>
         </div>
@@ -461,9 +457,7 @@
         });
 
         // ── GOOGLE LOGIN ──────────────────────────────────────
-        // IMPORTANTE: Reemplaza 'TU_GOOGLE_CLIENT_ID' con tu Client ID real
-        // obtenido en https://console.cloud.google.com/
-        const GOOGLE_CLIENT_ID = '156345189017-ko7l7t5i8ou5lh3hi1ap56hk1uod5ela.apps.googleusercontent.com';
+        const GOOGLE_CLIENT_ID = '1053105340762-jcc9red0ai1u3v6lcalj5ks62qks6eqb.apps.googleusercontent.com';
 
         function loginConGoogle() {
             // Inicializa Google Identity Services con un popup

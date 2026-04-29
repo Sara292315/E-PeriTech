@@ -117,20 +117,24 @@ try {
                 responder(false, null, 'Token de Google requerido.', 400);
             }
 
-            // Verificar el token con Google y obtener info del usuario
-            $googleRes = @file_get_contents(
-                'https://www.googleapis.com/oauth2/v3/userinfo',
-                false,
-                stream_context_create([
-                    'http' => [
-                        'header' => 'Authorization: Bearer ' . $d['access_token'],
-                        'timeout' => 10,
-                    ]
-                ])
-            );
+            // Verificar el token con Google usando cURL (compatible con XAMPP)
+            $ch = curl_init('https://www.googleapis.com/oauth2/v3/userinfo');
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT        => 10,
+                CURLOPT_HTTPHEADER     => ['Authorization: Bearer ' . $d['access_token']],
+                CURLOPT_SSL_VERIFYPEER => false,
+            ]);
+            $googleRes = curl_exec($ch);
+            $curlError = curl_error($ch);
+            $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
 
-            if (!$googleRes) {
-                responder(false, null, 'No se pudo verificar el token con Google.', 401);
+            if (!$googleRes || $curlError) {
+                responder(false, null, 'No se pudo verificar el token con Google: ' . $curlError, 401);
+            }
+            if ($httpCode !== 200) {
+                responder(false, null, 'Token de Google rechazado (HTTP ' . $httpCode . ').', 401);
             }
 
             $gUser = json_decode($googleRes, true);
