@@ -30,7 +30,10 @@
 //    PUT    /api/productos.php?action=actualizar&id=1
 //    DELETE /api/productos.php?action=eliminar&id=1
 // ============================================================
+require_once __DIR__ . '/../app/Core/Logger.php';
+use App\Core\Logger;
 
+Logger::info("FUNCIONA EL LOGGER");
 
 require_once 'config.php';
 

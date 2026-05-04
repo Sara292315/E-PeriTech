@@ -17,9 +17,12 @@
 //  Endpoints via HTTP + JSON para gestion de ordenes.
 // ============================================================
 
-
+require_once __DIR__ . '/../app/Core/Logger.php';
+use App\Core\Logger;
 require_once 'config.php';
 session_start();
+
+Logger::info("todo bien");
 
 $action = $_GET['action'] ?? '';
 

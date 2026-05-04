@@ -29,9 +29,12 @@
 //    DELETE /api/usuarios.php?action=eliminar&id=X
 // ============================================================
 
-
+require_once __DIR__ . '/../app/Core/Logger.php';
+use App\Core\Logger;
 require_once 'config.php';
 session_start();
+
+Logger::info("PRUEBA DE AUDITORIA");
 
 $action = $_GET['action'] ?? '';
 

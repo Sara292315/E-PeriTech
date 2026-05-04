@@ -1,10 +1,10 @@
 <?php
 // ============================================================
-//  E-PeriTech — Componente de Auditoría (Logging)
+//  E-PeriTech — Componente de Auditoría (Logger)
 // ============================================================
-//  Unidad 3 — Auditoría de Código y Mantenibilidad
-//  Clase Logger: Registro de eventos del sistema.
-//  Ubicación: /app/Core/Logger.php
+//  GUIA #8 - Actividad 3: Implementación del Componente de Auditoría
+//  Clase responsable de registrar eventos del sistema en un
+//  archivo de auditoría persistente (audit.log).
 // ============================================================
 
 namespace App\Core;
