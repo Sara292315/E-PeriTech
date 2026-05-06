@@ -5,9 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - E-PeriTech</title>
     <link rel="stylesheet" href="../public/css/styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!--
+        SEGURIDAD - Subresource Integrity (SRI) — SonarCloud S5722
+        ─────────────────────────────────────────────────────────────
+        Google Fonts y Google GSI NO admiten atributos integrity fijos
+        porque Google rota y actualiza estos recursos continuamente;
+        un hash fijo haría que el navegador los rechace al cambiar.
+
+        Mitigaciones aplicadas en su lugar:
+          1. crossorigin="anonymous"  → fuerza solicitud CORS limpia,
+             impide que el navegador envíe cookies a Google.
+          2. La política CSP en .htaccess restringe los orígenes
+             permitidos para style-src y script-src a los dominios
+             exactos de Google, limitando el riesgo de sustitución.
+          3. Para fuentes: se recomienda alojar Space Grotesk
+             localmente (ver carpeta /public/fonts/) y eliminar
+             esta dependencia de Google Fonts completamente.
+    -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+          crossorigin="anonymous">
     <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://accounts.google.com/gsi/client"
+            async defer
+            crossorigin="anonymous"></script>
     <style>
         :root {
             --primary: #667eea;

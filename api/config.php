@@ -57,9 +57,26 @@ function getDB(): PDO {
 //  E-PeriTech: comunicacion via HTTP + JSON.
 // ---------------------------------------------------------
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
+
+// --------------CLIENTE SERVIDOR-------------------------
+//  SEGURIDAD CORS: Se restringe el origen permitido al
+//  dominio propio del frontend en lugar de wildcard '*'.
+//  Esto previene que dominios externos realicen peticiones
+//  cross-origin a la API (recomendación SonarCloud S5122).
+//  En producción cambiar por el dominio real del servidor.
+// ---------------------------------------------------------
+$allowed_origin = 'http://localhost';   // <- cambiar al dominio real en producción
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin === $allowed_origin) {
+    header("Access-Control-Allow-Origin: $allowed_origin");
+} else {
+    header('Access-Control-Allow-Origin: null');
+}
+
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Vary: Origin');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
