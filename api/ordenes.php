@@ -95,7 +95,7 @@ try {
                 }
                 
                 // Generar ID de orden (ORD-{timestamp})
-                $ordenId = 'ORD-' . time() . '-' . rand(100, 999);
+                $ordenId = 'ORD-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(6)));
                 
                 // Insertar orden
                 $stmt = $pdo->prepare("
