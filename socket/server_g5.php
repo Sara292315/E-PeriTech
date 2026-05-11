@@ -156,10 +156,13 @@ if ($producto instanceof Producto) {
     //  El servidor serializa su respuesta y la envia con ##FIN##
     //  siguiendo el flujo Request/Response de la Guia #1 Act. 4.
     // ---------------------------------------------------------
+<<<<<<< HEAD
     echo $producto->mostrar() . PHP_EOL;
     echo "=========================================" . PHP_EOL . PHP_EOL;
 
     // Enviar respuesta serializada de vuelta al cliente
+=======
+>>>>>>> 4f9c9522a3e8ba70e92b2660954ed5a4cf7bf7f1
     $respuesta = serialize([
         'estado'   => 'OK',
         'mensaje'  => 'Producto recibido y reconstruido',

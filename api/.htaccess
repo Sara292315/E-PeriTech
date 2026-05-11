@@ -7,10 +7,26 @@ RewriteEngine On
     Allow from all
 </Limit>
 
-# Configurar CORS
-Header always set Access-Control-Allow-Origin "*"
+# ─── SEGURIDAD CORS (SonarCloud S5122) ───────────────────────────────────────
+# Se elimina el wildcard '*' y se limita el origen al frontend propio.
+# Cambiar 'http://localhost' por el dominio real en producción.
+# ─────────────────────────────────────────────────────────────────────────────
+SetEnvIf Origin "^http://localhost$" CORS_ORIGIN=$0
+Header always set Access-Control-Allow-Origin "%{CORS_ORIGIN}e" env=CORS_ORIGIN
 Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
 Header always set Access-Control-Allow-Headers "Content-Type"
+Header always set Vary "Origin"
+
+# ─── CONTENT SECURITY POLICY ─────────────────────────────────────────────────
+# Mitiga el riesgo de SRI no disponible en Google Fonts y GSI
+# restringiendo los orígenes de scripts y estilos externos.
+# ─────────────────────────────────────────────────────────────────────────────
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data: https:; frame-ancestors 'none';"
+
+# ─── CABECERAS DE SEGURIDAD ADICIONALES ──────────────────────────────────────
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "DENY"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
 
 # Manejar preflight OPTIONS
 RewriteCond %{REQUEST_METHOD} OPTIONS

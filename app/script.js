@@ -33,7 +33,7 @@ async function loadProducts() {
                     id: p.id,
                     name: p.nombre,
                     price: parseFloat(p.precio),
-                    oldPrice: p.precio_anterior ? parseFloat(p.precio_anterior) : null,
+                    oldPrice: p.precio_viejo ? parseFloat(p.precio_viejo) : null,
                     discount: p.descuento || 0,
                     icon: p.icono || '📦',
                     category: p.categoria_slug || '',

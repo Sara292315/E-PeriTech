@@ -16,10 +16,28 @@
 //  GUIA #2 - Actividad 1: Middleware Web Services REST
 //  Endpoints via HTTP + JSON para gestion de ordenes.
 // ============================================================
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 2: Capa de Logica de Negocio
+//  Gestiona el proceso de compra desde el servidor.
+//  Las ordenes son un proceso critico que se ejecuta
+//  remotamente en Ubuntu+PHP, nunca en el cliente.
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 3: Procesos Remotos del Servidor
+//  Registro de solicitudes de contacto/compra y
+//  administracion futura del catalogo, tal como se
+//  definio en los procesos remotos de la Guia #1.
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #2 - Actividad 1: Middleware Web Services REST
+//  Endpoints via HTTP + JSON para gestion de ordenes.
+// ============================================================
 
 
+require_once __DIR__ . '/../app/Core/Logger.php';
+use App\Core\Logger;
 require_once 'config.php';
 session_start();
+
+Logger::info("todo bien");
 
 $action = $_GET['action'] ?? '';
 
@@ -92,7 +110,7 @@ try {
                 }
                 
                 // Generar ID de orden (ORD-{timestamp})
-                $ordenId = 'ORD-' . time() . '-' . rand(100, 999);
+                $ordenId = 'ORD-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(6)));
                 
                 // Insertar orden
                 $stmt = $pdo->prepare("
@@ -159,4 +177,6 @@ try {
 
 } catch (PDOException $e) {
     responder(false, null, 'Error de base de datos: ' . $e->getMessage(), 500);
+} catch (Throwable $e) {
+    responder(false, null, 'Error del servidor: ' . $e->getMessage(), 500);
 }

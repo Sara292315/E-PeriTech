@@ -48,7 +48,7 @@ CREATE TABLE usuarios (
     password    VARCHAR(255) NOT NULL,              -- hash (bcrypt en producción)
     telefono    VARCHAR(30)  DEFAULT NULL,
     direccion   VARCHAR(255) DEFAULT NULL,          -- solo compradores
-    avatar      VARCHAR(10)  DEFAULT '👤',
+    avatar      VARCHAR(10)  DEFAULT NULL,
     activo      TINYINT(1)   NOT NULL DEFAULT 1,
     created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -105,7 +105,7 @@ CREATE TABLE productos (
     precio        DECIMAL(12,2) NOT NULL,
     precio_viejo  DECIMAL(12,2) DEFAULT NULL,
     descuento     TINYINT UNSIGNED NOT NULL DEFAULT 0,  -- % calculado
-    icono         VARCHAR(10)  DEFAULT '📦',
+    icono         VARCHAR(10)  DEFAULT NULL,
     descripcion   TEXT         DEFAULT NULL,
     proveedor_id  VARCHAR(30)  DEFAULT NULL,            -- NULL = producto propio
     activo        TINYINT(1)   NOT NULL DEFAULT 1,

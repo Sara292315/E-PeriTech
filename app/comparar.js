@@ -198,8 +198,37 @@ function viewProductDetail(productId) {
     window.location.href = 'producto.html';
 }
 
+// Mapa de productos por ID (se llena al cargar la página)
+let productsData = {};
+
 // Inicializar
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // Cargar productos desde la API para construir productsData
+    if (typeof DB !== 'undefined' && DB.getProducts) {
+        try {
+            const response = await DB.getProducts();
+            if (response && response.ok && response.data) {
+                response.data.forEach(p => {
+                    productsData[p.id] = {
+                        id: p.id,
+                        name: p.nombre,
+                        price: parseFloat(p.precio),
+                        oldPrice: p.precio_viejo ? parseFloat(p.precio_viejo) : null,
+                        discount: p.descuento || 0,
+                        icon: p.icono || '📦',
+                        category: p.categoria_slug || '',
+                        categoryName: p.categoria_nombre || '',
+                        description: p.descripcion || '',
+                        brand: p.marca || 'Sin marca',
+                        sku: p.id,
+                        features: p.descripcion ? [p.descripcion] : [],
+                    };
+                });
+            }
+        } catch (e) {
+            console.error('Error cargando productos para comparación:', e);
+        }
+    }
     renderComparison();
     renderQuickAdd();
 });
