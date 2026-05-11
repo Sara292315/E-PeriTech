@@ -388,7 +388,7 @@
                     ✅ ¡Mensaje enviado con éxito! Te contactaremos pronto.
                 </div>
 
-                <form id="contactForm" onsubmit="handleSubmit(event)">
+                <form action="procesar.php" method="POST">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nombre">Nombre completo *</label>
@@ -396,7 +396,7 @@
                         </div>
                         <div class="form-group">
                             <label for="email">Correo electrónico *</label>
-                            <input type="email" id="email" name="email" required placeholder="juan@ejemplo.com">
+                            <input type="emai<input type="email" id="email" name="correo" required placeholder="juan@ejemplo.com">
                         </div>
                     </div>
 
