@@ -1,3 +1,17 @@
+// ============================================================
+//  E-PeriTech — ofertas.js
+// ============================================================
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 3: Procesos Remotos del Servidor
+//  La gestion de ofertas es un proceso ejecutado en el
+//  servidor PHP segun la Guia #1 Act. 3. Este archivo
+//  consume esos datos remotamente via API REST.
+// --------------CLIENTE SERVIDOR-------------------------
+//  GUIA #1 - Actividad 3: Procesos del Cliente
+//  Visualizacion de ofertas en el cliente con datos
+//  obtenidos del servidor (Capa de Logica de Negocio).
+// ============================================================
+
 // Productos en oferta (solo los que tienen descuento)
 const offerProducts = products.filter(p => p.discount > 0);
 
