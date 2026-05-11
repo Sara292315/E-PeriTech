@@ -387,7 +387,11 @@
                 <div class="success-alert" id="successAlert">
                     ✅ ¡Mensaje enviado con éxito! Te contactaremos pronto.
                 </div>
-
+    <?php if(isset($_GET['error'])): ?>
+        <div style="background-color: #ffe6e6; color: #d63031; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold;">
+            ⚠️ Error: Revisa que todos los campos estén llenos y que el correo sea válido.
+        </div>
+    <?php endif; ?>
                 <form action="procesar.php" method="POST">
                     <div class="form-row">
                         <div class="form-group">
@@ -408,14 +412,23 @@
                         <div class="form-group">
                             <label for="asunto">Asunto *</label>
                             <select id="asunto" name="asunto" required>
-                                <option value="">Selecciona un asunto</option>
-                                <option value="consulta">Consulta de producto</option>
-                                <option value="soporte">Soporte web</option>
-                                <!-- FIX 2: option vacío reemplazado con label y texto -->
-                                <option value="se">Servicio</option>
-                                <option value="pedido">Estado de pedido</option>
-                                <option value="otro">Otro</option>
-                            </select>
+                            <option value="">Selecciona un asunto</option>
+                            <?php
+                            // GUÍA 9 - Automatización mediante Estructuras de Repetición:
+                            $lista_asuntos = [
+                            "consulta" => "Consulta de producto",
+                            "soporte" => "Soporte web",
+                            "servicio" => "Servicio técnico",
+                            "pedido" => "Estado de pedido",
+                            "otro" => "Otro motivo"
+                            ];
+    
+                            // Usamos foreach para recorrer el arreglo
+                            foreach ($lista_asuntos as $valor => $texto_mostrar) {
+                             echo "<option value='" . $valor . "'>" . $texto_mostrar . "</option>";
+                            }
+                            ?>
+                        </select>
                         </div>
                     </div>
 

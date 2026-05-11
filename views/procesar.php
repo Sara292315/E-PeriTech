@@ -1,38 +1,26 @@
 <?php
 // GUÍA #8 DESARROLLO BÁSICO DE APLICACIONES: Lógica PHP implementada. Formulario contacto.php envía datos por POST y procesar.php los recibe usando variables y constantes.
-// 1. CONSTANTES: Se pide usar define() para datos que no cambian.
-define("NOMBRE_EMPRESA", "E-PeriTech");
-
-// 2. RECEPCIÓN DE DATOS: Se pide usar $_POST y variables.
-// Aquí atrapamos cada pedacito de información que viajó desde contacto.php
-$nombre_usuario = $_POST['nombre'];
-$correo_usuario = $_POST['correo'];  
-$telefono_usuario = $_POST['telefono'];
+// GUÍA #9 - Validación y Filtros de Seguridad:
+// Usamos trim() para quitar espacios vacíos y filter_var() para sanear el correo.
+$nombre_usuario = trim($_POST['nombre']);
+$correo_usuario = filter_var(trim($_POST['correo']), FILTER_SANITIZE_EMAIL);
+$telefono_usuario = trim($_POST['telefono']);
 $asunto_usuario = $_POST['asunto'];
-$mensaje_usuario = $_POST['mensaje'];
+$mensaje_usuario = trim($_POST['mensaje']);
 
-// 3. OPERADORES Y LÓGICA: Se pide hacer cálculos o unir textos.
-// Usamos el punto (.) para concatenar (unir) variables con texto normal.
-$saludo = "¡Hola, " . $nombre_usuario . "! ";
-$texto_agradecimiento = "Hemos recibido tu solicitud sobre '" . $asunto_usuario . "'. ";
-$despedida = "El equipo de " . NOMBRE_EMPRESA . " te contactará pronto al " . $telefono_usuario . ".";
+// GUÍA 9 - Implementación de lógica de control (Condicionales):
+// Verificamos si los campos están vacíos o si el correo es inválido.
+if (empty($nombre_usuario) || empty($correo_usuario) || empty($mensaje_usuario) || !filter_var($correo_usuario, FILTER_VALIDATE_EMAIL)) {
+    
+    // GUÍA 9 - Control de Flujo y Redireccionamiento (Error):
+    // Si falla, lo devolvemos al formulario enviando una variable 'error' por la URL.
+    header("Location: contacto.php?error=datos_invalidos");
+    exit(); 
 
-// Unimos todo en un solo gran mensaje:
-$mensaje_final = $saludo . $texto_agradecimiento . $despedida;
-
-// 4. RESPUESTA (echo): Mostramos el resultado en pantalla
-echo "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);'>";
-echo "<h2 style='color: #667eea;'>✅ ¡Formulario procesado en el servidor!</h2>";
-echo "<p style='color: #333; line-height: 1.6;'><strong>Respuesta del sistema:</strong> <br>" . $mensaje_final . "</p>";
-echo "<hr style='border: 1px solid #eee; margin: 20px 0;'>";
-echo "<h3 style='color: #555;'>Resumen de los datos recibidos (Superglobal \$_POST):</h3>";
-echo "<ul>";
-echo "<li><strong>Nombre:</strong> " . $nombre_usuario . "</li>";
-echo "<li><strong>Correo:</strong> " . $correo_usuario . "</li>";
-echo "<li><strong>Asunto:</strong> " . $asunto_usuario . "</li>";
-echo "<li><strong>Mensaje:</strong> " . $mensaje_usuario . "</li>";
-echo "</ul>";
-echo "<br>";
-echo '<a href="contacto.php" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Volver a Contacto</a>';
-echo "</div>";
+} else {
+    // GUÍA 9 - Control de Flujo y Redireccionamiento (Éxito):
+    // Si todo está correcto, lo enviamos a la página de éxito.
+    header("Location: exito.php?usuario=" . urlencode($nombre_usuario));
+    exit();
+}
 ?>
