@@ -1,0 +1,20 @@
+<definitions name="EPeriTechService" 
+             targetNamespace="http://eperitech.fesc.edu" 
+             xmlns="http://schemas.xmlsoap.org/wsdl/">
+             
+  <message name="PeticionConsulta">
+    <part name="categoria" type="xsd:string"/>
+    <part name="marca" type="xsd:string"/>
+  </message>
+  
+  <message name="RespuestaConsulta">
+    <part name="resultado" type="xsd:string"/>
+  </message>
+
+  <portType name="ConsultaPort">
+    <operation name="consulta_producto">
+      <input message="tns:PeticionConsulta"/>
+      <output message="tns:RespuestaConsulta"/>
+    </operation>
+  </portType>
+</definitions>
