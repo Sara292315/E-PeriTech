@@ -1,0 +1,11 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="peticion">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="operacion" type="xs:string"/>
+        <xs:element name="categoria" type="xs:string"/>
+        <xs:element name="marca" type="xs:string"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
